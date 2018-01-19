@@ -2,11 +2,11 @@
   "name": "whitestorm-app-boilerplate",
   "version": "0.1.0",
   "description": "Boilerplate for whitestorm app",
-  "main": "index.js",
+  "main": "webpack.config.babel.js",
   "scripts": {
     "test": "echo \"No test specified\" && exit 0",
     "build": "cross-env NODE_ENV=production webpack",
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --open --config webpack.config.babel.js",
     "deploy": "surge --project ./ --domain whs-boilerplate-app.surge.sh"
   },
   "repository": {

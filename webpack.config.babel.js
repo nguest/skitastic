@@ -81,7 +81,10 @@ function pluginsList(prod) {
         test: /\.js$|\.css$|\.html$/,
         threshold: 1024,
         minRatio: 0.8
-      })
+      }),
+      new webpack.DefinePlugin({
+        "process.env.NODE_ENV": JSON.stringify("development")
+      }),
   ];
   if(prod) {
     plugins.push(

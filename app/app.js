@@ -8,7 +8,12 @@ import StatsModule from './modules/StatsModule';
 const app = new WHS.App([
   new WHS.ElementModule(),
   new WHS.SceneModule(),
-  new WHS.DefineModule('camera', new WHS.PerspectiveCamera(UTILS.appDefaults.camera)),
+  new WHS.DefineModule('camera', 
+    new WHS.PerspectiveCamera({
+      position: new THREE.Vector3(0, 50, 150),
+      far: 1000
+    })
+  ),
   new WHS.RenderingModule(UTILS.appDefaults.rendering, {
     shadow: true
   }),
@@ -20,22 +25,80 @@ const app = new WHS.App([
 import {FancyMaterialModule} from './modules/FancyMaterialModule';
 import {BasicComponent} from './components/BasicComponent';
 
-console.log(process)
-// const app = new App([
-//   new ElementModule(document.getElementById('app')),
-//   new SceneModule(),
-//   new DefineModule('camera', new PerspectiveCamera({
-//     position: {y: 20, z: -30
-//     }
-//   })),
-//   new RenderingModule({bgColor: 0x444444}),
-//   new OrbitControlsModule()
-// ]);
 
-UTILS.addBoxPlane(app);
+//UTILS.addBoxPlane(app);
 UTILS.addBasicLights(app);
 
+// u, v go 0=>1
+const func = (u, v) =>
+  //new THREE.Vector3(u * 100, Math.sin(u * 10) * 4, v * 100);
+  new THREE.Vector3(u * 200, 30*Math.pow((u-0.5),2) * 4, v * 200);
 
+const heightSegments = {x:4,y:4}
+
+const terrain = new WHS.Parametric({
+  geometry: {
+    func,
+    slices: heightSegments.x,
+    stacks: heightSegments.y,
+  },
+
+  scale: new THREE.Vector3(1,1,1),
+
+  shadow: {
+    cast: false
+  },
+
+  material: new THREE.MeshPhongMaterial({
+    color: 0xdddddd,//sUTILS.$colors.mesh,
+    side: THREE.DoubleSide,
+    wireframe: true,
+  }),
+
+  modules: [
+    new PHYSICS.HeightfieldModule({
+      mass: 0,
+      size: new THREE.Vector2(heightSegments.x, heightSegments.y),
+      autoAlign: true
+    })
+  ]
+});
+console.log(process.env)
+
+
+terrain.addTo(app);
+
+
+const teapot = new WHS.Importer({
+  url: `${process.assetsPath}/models/teapot/utah-teapot-large.json`,
+
+  modules: [
+    new PHYSICS.ConcaveModule({
+      friction: 1,
+      mass: 200,
+      restitution: 0.5,
+      path: `${process.assetsPath}/models/teapot/utah-teapot-light.json`,
+      scale: new THREE.Vector3(4, 4, 4)
+    }),
+    new WHS.TextureModule({
+      url: `${process.assetsPath}/textures/teapot.jpg`,
+      repeat: new THREE.Vector2(1, 1)
+    })
+  ],
+
+  useCustomMaterial: true,
+
+  material: new THREE.MeshPhongMaterial({
+    shading: THREE.SmoothShading,
+    side: THREE.DoubleSide
+  }),
+
+  position: {
+    y: 100
+  },
+
+  scale: [4, 4, 4]
+});
 // app.add(new BasicComponent({
 //   modules: [
 //     new FancyMaterialModule(app)
@@ -70,8 +133,14 @@ const sphere = new WHS.Sphere({ // Create sphere comonent.
     color: UTILS.$colors.mesh
   }),
 
-  position: new THREE.Vector3(0, 20, 0)
+  position: new THREE.Vector3(90, 100, 0)
 });
 app.add(sphere)
 
 app.start();
+
+document.getElementById('reset').addEventListener('click',()=>{
+  app.stop()
+  sphere.position.set(90,100,0);
+  app.start();
+})
