@@ -20,8 +20,10 @@
   },
   "homepage": "https://github.com/WhitestormJS/whitestorm-app-boilerplate#readme",
   "dependencies": {
-    "whs": "2.1.2",
-    "present": "^1.0.0"
+    "physics-module-ammonext": "^0.1.2-fix.1",
+    "present": "^1.0.0",
+    "three": "^0.89.0",
+    "whs": "^2.1.9"
   },
   "devDependencies": {
     "babel-cli": "^6.22.2",

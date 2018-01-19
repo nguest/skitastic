@@ -1,18 +1,22 @@
 import {
   Mesh,
   IcosahedronGeometry,
-  MeshBasicMaterial
+  MeshBasicMaterial,
+  Vector3
 } from 'three';
 
-import {MeshComponent} from 'whs';
+import { MeshComponent } from 'whs';
 
 export class BasicComponent extends MeshComponent {
   build() {
     return new Mesh(
       new IcosahedronGeometry(3, 5),
+
       this.applyBridge({
         material: new MeshBasicMaterial({color: 0xffffff})
-      }).material
+      }).material,
+
+
     )
   }
 }
