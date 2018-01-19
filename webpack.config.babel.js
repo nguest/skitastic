@@ -5,7 +5,7 @@ import CompressionPlugin from 'compression-webpack-plugin';
 import alias from 'whs/tools/alias';
 
 const isProduction = process.env.NODE_ENV === 'production';
-//const isProduction = env.production === true 
+//const isProduction = env.production === true
 
 
 //process.env.NODE_ENV = 'development';
@@ -49,6 +49,7 @@ const config = {
 
   devServer: {
     publicPath: '/',
+    port: 8085,
     stats: { chunks: true }
   },
 

@@ -8,7 +8,7 @@ import StatsModule from './modules/StatsModule';
 const app = new WHS.App([
   new WHS.ElementModule(),
   new WHS.SceneModule(),
-  new WHS.DefineModule('camera', 
+  new WHS.DefineModule('camera',
     new WHS.PerspectiveCamera({
       position: new THREE.Vector3(0, 50, 150),
       far: 1000
@@ -32,9 +32,11 @@ UTILS.addBasicLights(app);
 // u, v go 0=>1
 const func = (u, v) =>
   //new THREE.Vector3(u * 100, Math.sin(u * 10) * 4, v * 100);
-  new THREE.Vector3(u * 200, 30*Math.pow((u-0.5),2) * 4, v * 200);
+  new THREE.Vector3(u * 200, 120*Math.pow((u-0.5),2)-v*20, v * 200);
 
 const heightSegments = {x:4,y:4}
+
+const scaleX = 1
 
 const terrain = new WHS.Parametric({
   geometry: {
@@ -43,7 +45,7 @@ const terrain = new WHS.Parametric({
     stacks: heightSegments.y,
   },
 
-  scale: new THREE.Vector3(1,1,1),
+  scale: new THREE.Vector3(scaleX,1,1),
 
   shadow: {
     cast: false
@@ -59,12 +61,14 @@ const terrain = new WHS.Parametric({
     new PHYSICS.HeightfieldModule({
       mass: 0,
       size: new THREE.Vector2(heightSegments.x, heightSegments.y),
-      autoAlign: true
+      autoAlign: true,
+      scale: new THREE.Vector3(scaleX,1,1),
+      friction: 0.7
     })
   ]
 });
-console.log(process.env)
 
+console.log(terrain.geometry.vertices, {terrain})
 
 terrain.addTo(app);
 
@@ -133,14 +137,16 @@ const sphere = new WHS.Sphere({ // Create sphere comonent.
     color: UTILS.$colors.mesh
   }),
 
-  position: new THREE.Vector3(90, 100, 0)
+  position: new THREE.Vector3(9, 50, 0)
 });
 app.add(sphere)
 
-app.start();
+app.start()
+
+console.log({app})
 
 document.getElementById('reset').addEventListener('click',()=>{
   app.stop()
-  sphere.position.set(90,100,0);
+  sphere.position.set(9,50,0);
   app.start();
 })

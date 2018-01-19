@@ -1842,9 +1842,10 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
         }
       case 'heightfield':
         {
+					console.log(description)
           var xpts = description.xpts,
               ypts = description.ypts,
-              points = description.points,
+              points = description.points.reverse(),
               ptr = Ammo._malloc(4 * xpts * ypts);
 
           for (var _i2 = 0, p = 0, p2 = 0; _i2 < xpts; _i2++) {
@@ -1855,7 +1856,7 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
               p2 += 4;
             }
           }
-
+					console.log({points})
           shape = new Ammo.btHeightfieldTerrainShape(description.xpts, description.ypts, ptr, 1, -description.absMaxHeight, description.absMaxHeight, 1, 'PHY_FLOAT', false);
 
           _noncached_shapes[description.id] = shape;
@@ -1865,7 +1866,6 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
         // Not recognized
         return;
     }
-
     return shape;
   };
 
@@ -1912,7 +1912,7 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
 
     if (params.noWorker) {
       window.Ammo = new params.ammo();
- 
+
       public_functions.makeWorld(params);
       return;
     }
@@ -1924,7 +1924,7 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
       public_functions.makeWorld(params);
     } else {
       //importScripts(params.ammo);
-      importScripts('http://localhost:8080/ammo.js');
+      importScripts('http://localhost:8085/ammo.js');
 
       send({ cmd: 'ammoLoaded' });
 
@@ -2128,7 +2128,6 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
       _vec3_1.setX(description.scale.x);
       _vec3_1.setY(description.scale.y);
       _vec3_1.setZ(description.scale.z);
-
       shape.setLocalScaling(_vec3_1);
       shape.setMargin(description.margin ? description.margin : 0);
 
@@ -2389,7 +2388,7 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
   };
 
   public_functions.onSimulationResume = function () {
-    
+
   };
 
   public_functions.setAngularVelocity = function (details) {
