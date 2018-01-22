@@ -1480,9 +1480,9 @@ var WorldModuleBase = (_temp2 = _class = function (_Eventable) {
 }(Eventable), _class.defaults = {
   fixedTimeStep: 1 / 60,
   rateLimit: true,
-  ammo: "http://localhost:8080/ammo.js",
+  ammo: "http://localhost:8085/ammo.js",
   softbody: false,
-  gravity: new three.Vector3(0, -100, 0)
+  gravity: new three.Vector3(0, -20, 0)
 }, _temp2);
 
 var TARGET = typeof Symbol === 'undefined' ? '__target' : Symbol();
@@ -1592,7 +1592,7 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
           i = list.length = func ? list.length : 0;
       while (i--) {
         func == list[i][0] && list.splice(i, 1);
-      }return target;
+      } return target;
     };
     /**
      * Emit: send event, callbacks will be triggered
@@ -1604,7 +1604,7 @@ var PhysicsWorker = new shimWorker("../worker.js", function (window, document) {
           j;
       while (j = list[i++]) {
         j[0].apply(j[1], empty.slice.call(arguments, 1));
-      }return target;
+      } return target;
     };
   }
 

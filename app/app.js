@@ -1,152 +1,118 @@
 import * as THREE from 'three';
 import * as UTILS from './globals';
 import * as WHS from 'whs';
-//import Ammo from './modules/ammo'
 import * as PHYSICS from './modules/physics-module';
 import StatsModule from './modules/StatsModule';
+import loadSkyBox from './components/Skybox';
+import importTerra from './components/Terrain';
+import Slider from './components/Slider';
+
+
+const scene = new THREE.Scene();
+
+let firstPerson = true;
 
 const app = new WHS.App([
   new WHS.ElementModule(),
-  new WHS.SceneModule(),
-  new WHS.DefineModule('camera',
-    new WHS.PerspectiveCamera({
-      position: new THREE.Vector3(0, 50, 150),
-      far: 1000
-    })
-  ),
-  new WHS.RenderingModule(UTILS.appDefaults.rendering, {
-    shadow: true
-  }),
-  new PHYSICS.WorldModule(UTILS.appDefaults.physics),
-  new WHS.OrbitControlsModule(),
-  new WHS.ResizeModule(),
-  new StatsModule()
+  new WHS.SceneModule(true),
 ]);
-import {FancyMaterialModule} from './modules/FancyMaterialModule';
-import {BasicComponent} from './components/BasicComponent';
 
+app.setScene(scene);
 
-//UTILS.addBoxPlane(app);
-UTILS.addBasicLights(app);
+app
+  .module(new WHS.DefineModule('camera',
+    new WHS.PerspectiveCamera({
+      position: new THREE.Vector3(0, 20, 0),
+      target: new THREE.Vector3(0, -20, 400),
 
-// u, v go 0=>1
-const func = (u, v) =>
-  //new THREE.Vector3(u * 100, Math.sin(u * 10) * 4, v * 100);
-  new THREE.Vector3(u * 200, 120*Math.pow((u-0.5),2)-v*20, v * 200);
-
-const heightSegments = {x:4,y:4}
-
-const scaleX = 1
-
-const terrain = new WHS.Parametric({
-  geometry: {
-    func,
-    slices: heightSegments.x,
-    stacks: heightSegments.y,
-  },
-
-  scale: new THREE.Vector3(scaleX,1,1),
-
-  shadow: {
-    cast: false
-  },
-
-  material: new THREE.MeshPhongMaterial({
-    color: 0xdddddd,//sUTILS.$colors.mesh,
-    side: THREE.DoubleSide,
-    wireframe: true,
-  }),
-
-  modules: [
-    new PHYSICS.HeightfieldModule({
-      mass: 0,
-      size: new THREE.Vector2(heightSegments.x, heightSegments.y),
-      autoAlign: true,
-      scale: new THREE.Vector3(scaleX,1,1),
-      friction: 0.7
+      rotation: new THREE.Vector3(0, Math.PI, 0),
+      far: 25000,
+      near: 0.1,
+      fov: 25,
     })
-  ]
-});
-
-console.log(terrain.geometry.vertices, {terrain})
-
-terrain.addTo(app);
-
-
-const teapot = new WHS.Importer({
-  url: `${process.assetsPath}/models/teapot/utah-teapot-large.json`,
-
-  modules: [
-    new PHYSICS.ConcaveModule({
-      friction: 1,
-      mass: 200,
-      restitution: 0.5,
-      path: `${process.assetsPath}/models/teapot/utah-teapot-light.json`,
-      scale: new THREE.Vector3(4, 4, 4)
+  ))
+  .module(
+    new WHS.RenderingModule({ 
+    ...UTILS.appDefaults.rendering, 
+    shadow: true,
+    bgColor: 0xaaddff,
     }),
-    new WHS.TextureModule({
-      url: `${process.assetsPath}/textures/teapot.jpg`,
-      repeat: new THREE.Vector2(1, 1)
-    })
-  ],
+  )
+  .module(new PHYSICS.WorldModule(UTILS.appDefaults.physics))
+  .module(firstPerson ? null : new WHS.OrbitControlsModule())
+  .module(new WHS.ResizeModule())
+  .module(new StatsModule())
 
-  useCustomMaterial: true,
+// Add the objects
+const camera = app.manager.get('camera');
+const skyBox = loadSkyBox(app, scene);
+const slider = Slider();
+const terrain = importTerra();
+const timeDisplay = document.querySelector('#timeDisplay');
+const scaleX = 10
+const scaleZ = 10
 
-  material: new THREE.MeshPhongMaterial({
-    shading: THREE.SmoothShading,
-    side: THREE.DoubleSide
-  }),
 
-  position: {
-    y: 100
-  },
+UTILS.addBasicLights({app, position:[0, 200, 0], intensity: 1, distance: 100 });
 
-  scale: [4, 4, 4]
-});
-// app.add(new BasicComponent({
-//   modules: [
-//     new FancyMaterialModule(app)
-//   ],
-//   position: new THREE.Vector3(10, 5, 0),
-// }));
-
-// const sphere = new THREE.Mesh(
-//   new THREE.SphereGeometry(3, 5, 12),
-//   new THREE.MeshPhongMaterial({
-//     color: UTILS.$colors.mesh
-//   }),
-// )
-// sphere.physics = false;
-//app.add(sphere)
-
-const sphere = new WHS.Sphere({ // Create sphere comonent.
+const cube = new WHS.Box({ // Create box comonent.
   geometry: {
-    radius: 5,
-    widthSegments: 32,
-    heightSegments: 32
+    width: 400,
+    height: 100,
+    depth: 100
   },
 
   modules: [
-    new PHYSICS.SphereModule({
-      mass: 10,
-      restitution: 1
+    new PHYSICS.BoxModule({
+      mass: 0,
+      restitution: 1,
+      friction: 1,
+      //scale: new THREE.Vector3(1, 100, 100)
     })
   ],
 
   material: new THREE.MeshPhongMaterial({
-    color: UTILS.$colors.mesh
+    color: 0xff3333,
   }),
 
-  position: new THREE.Vector3(9, 50, 0)
+  position: new THREE.Vector3(0, -2600, -12000)
 });
-app.add(sphere)
+
+
+// add things
+terrain.addTo(app).then(() => {
+  //const boxMin = importTerra().geometry.boundingBox.min;
+  //cube.position = boxMin.multiplyScalar(scaleX)
+  cube.addTo(app)
+  slider.addTo(app);
+});
+
+
+const gameLoop = new WHS.Loop((clock) => {
+  if (firstPerson) {
+    camera.position.x = slider.position.x+1;
+    camera.position.y = slider.position.y+0.25;
+    camera.position.z = slider.position.z;
+    camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
+  }
+  
+  timeDisplay.innerHTML = clock.getElapsedTime().toPrecision(3)
+  
+})
+
+gameLoop.start(app);
 
 app.start()
 
-console.log({app})
+// Event Listeners
 
 document.getElementById('reset').addEventListener('click',()=>{
-  app.stop()
-  sphere.position.set(9,50,0);
+  app.stop();
+  slider.position.set(-1, 0, 0);
   app.start();
 })
+document.getElementById('camera').addEventListener('click',()=>{
+  firstPerson = !firstPerson
+})
+
+

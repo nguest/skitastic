@@ -22,13 +22,15 @@ export const $world = {
 
   rendering: {
     background: {
-      color: 0x162129
+      color: 0xaaaaff
     },
+    clearColor: 0xaaaaff,
 
     pixelRatio: isMobile ? false : window.devicePixelRatio,
 
     renderer: {
-      antialias: !isMobile
+      antialias: !isMobile,
+      alpha:true,
     }
   },
 
@@ -93,18 +95,23 @@ export function addAmbient(app, intensity) {
   }).addTo(app);
 }
 
-export function addBasicLights(app, intensity = 0.5, position = [0, 10, 10], distance = 100, shadowmap) {
-  addAmbient(app, 1 - intensity);
+export function addBasicLights({app, intensity = 0.5, position = [0, 10, 10], distance = 1000, shadowmap}) {
+  //addAmbient(app, 0.2);
 
-  return new WHS.PointLight({
+ 
+
+  return new WHS.DirectionalLight( {
+
+    color: 0xffffff,
     intensity,
-    distance,
-
-    shadow: Object.assign({
-      fov: 90
-    }, shadowmap),
-
-    position
+    distance: 0, 
+    decay: 0.1,
+  
+    position,
+  
+    // target: {
+    //   x: 0, y: -20, z: 300
+    // }
   }).addTo(app);
 }
 
