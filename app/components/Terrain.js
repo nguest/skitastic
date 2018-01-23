@@ -22,11 +22,16 @@ const Terrain = () => {
       }),
     ],
     material: new THREE.MeshPhongMaterial({
-      color: 0xeeeeee,
+      //color: 0xeeeeee,
       flatShading: false,
       side: THREE.DoubleSide,
       wireframe: false,
-      specular: 0x555555
+      specular: 0x555555,
+      map: new THREE.TextureLoader().load('./assets/textures/UV_Grid_Sm.png', texture => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set( 1, 1 );
+      })
     }),
     position: {
       y: 0

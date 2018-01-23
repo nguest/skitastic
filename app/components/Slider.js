@@ -15,15 +15,15 @@ const Slider = () => {
         
         modules: [
             new PHYSICS.SphereModule({
-            mass: 10,
-            restitution: 0.3,
+            mass: 20,
+            restitution: 0.9,
             friction: 1,
             })
         ],
         
-        // material: new THREE.MeshPhongMaterial({
-        //   color: UTILS.$colors.mesh
-        // }),
+        material: new THREE.MeshPhongMaterial({
+          //color: UTILS.$colors.mesh
+        }),
         
         
         position: new THREE.Vector3(-1, 0, 0)

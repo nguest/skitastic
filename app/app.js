@@ -7,6 +7,8 @@ import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
 import Slider from './components/Slider';
 
+import Controls from './modules/Controls';
+
 
 //////////////////////////////////////
 // Setup app and three scene                  
@@ -15,6 +17,7 @@ import Slider from './components/Slider';
 const scene = new THREE.Scene();
 
 let firstPerson = true;
+let gameInProgress = false;
 
 const app = new WHS.App([
   new WHS.ElementModule(),
@@ -82,7 +85,7 @@ const cube = new WHS.Box({ // Create box component.
   position: new THREE.Vector3(0, -2600, -12000)
 });
 
-const physics = slider.use('physics');
+//const sliderPhysics = slider.use('physics');
 
 // e.g. physics.applyCentralImpulse(v)
 // applyImpulse
@@ -98,18 +101,21 @@ const physics = slider.use('physics');
 // Add the objects                   
 //////////////////////////////////////
 
+const controls = new Controls(scene, camera, slider);
+
+
 terrain.addTo(app).then(() => {
   //const boxMin = importTerra().geometry.boundingBox.min;
   //cube.position = boxMin.multiplyScalar(scaleX)
   cube.addTo(app)
   slider.addTo(app);
 
-
   slider.on('collision',  (otherObject, v, r, contactNormal) => {
     //console.log({otherObject},v, r);
     let collided;
     if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
       collided = true;
+      //console.log('collision!')
     }
   });
 });
@@ -121,21 +127,22 @@ terrain.addTo(app).then(() => {
 
 const gameLoop = new WHS.Loop((clock) => {
   if (firstPerson) {
-    camera.position.x = slider.position.x+1;
-    camera.position.y = slider.position.y+0.25;
-    camera.position.z = slider.position.z;
+    // camera.position.x = slider.position.x+1;
+    // camera.position.y = slider.position.y+0.25;
+    // camera.position.z = slider.position.z;
     camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
   }
-  
+  controls.update(clock.getElapsedTime())
   timeDisplay.innerHTML = clock.getElapsedTime().toPrecision(3)
 
   //console.log(physics.getLinearVelocity())
   
 })
 
-gameLoop.start(app);
 
 app.start()
+
+
 
 
 //////////////////////////////////////
@@ -149,6 +156,18 @@ document.getElementById('reset').addEventListener('click',()=>{
 })
 document.getElementById('camera').addEventListener('click',()=>{
   firstPerson = !firstPerson
+})
+document.addEventListener('keydown', (e) => {
+  if (e.keyCode === 32) {
+    if (gameInProgress) {
+      gameLoop.stop(app)
+      app.stop()
+    }
+      
+    gameLoop.start(app);
+    gameInProgress = !gameInProgress;
+
+  }
 })
 
 
