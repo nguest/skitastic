@@ -1,4 +1,7 @@
-function FirstPersonControlsSolver(camera, mesh, params) {
+import * as THREE from 'three';
+import * as WHS from 'whs';
+
+const Controls = (camera, mesh, params = { ypos: 0 , speed: 0 }) => {
     var _this = this;
   
     var velocityFactor = 1;
@@ -9,16 +12,16 @@ function FirstPersonControlsSolver(camera, mesh, params) {
   
     /* Init */
     var player = mesh,
-        pitchObject = new three.Object3D();
+        pitchObject = new THREE.Object3D();
   
     pitchObject.add(camera.native);
   
-    var yawObject = new three.Object3D();
+    var yawObject = new THREE.Object3D();
   
     yawObject.position.y = params.ypos; // eyes are 2 meters above the ground
     yawObject.add(pitchObject);
   
-    var quat = new three.Quaternion();
+    var quat = new THREE.Quaternion();
   
     var canJump = false,
   
@@ -141,8 +144,8 @@ function FirstPersonControlsSolver(camera, mesh, params) {
 
     // Moves the camera to the Physi.js object position
     // and adds velocity to the object if the run key is down.
-    var inputVelocity = new three.Vector3(),
-        euler = new three.Euler();
+    var inputVelocity = new THREE.Vector3(),
+        euler = new THREE.Euler();
 
     this.update = function (delta) {
         if (_this.enabled === false) return;
@@ -180,3 +183,5 @@ function FirstPersonControlsSolver(camera, mesh, params) {
         });
     });
 }
+
+export default Controls;
