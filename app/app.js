@@ -3,10 +3,14 @@ import * as UTILS from './globals';
 import * as WHS from 'whs';
 import * as PHYSICS from './modules/physics-module';
 import StatsModule from './modules/StatsModule';
-import loadSkyBox from './components/Skybox';
-import importTerra from './components/Terrain';
+import SkyBox from './components/Skybox';
+import Terrain from './components/Terrain';
 import Slider from './components/Slider';
 
+
+//////////////////////////////////////
+// Setup app and three scene                  
+//////////////////////////////////////
 
 const scene = new THREE.Scene();
 
@@ -43,25 +47,27 @@ app
   .module(new WHS.ResizeModule())
   .module(new StatsModule())
 
-// Add the objects
+
+//////////////////////////////////////
+// Get the objects                   
+//////////////////////////////////////
+
 const camera = app.manager.get('camera');
-const skyBox = loadSkyBox(app, scene);
+const skyBox = SkyBox(app, scene);
 const slider = Slider();
-const terrain = importTerra();
+const terrain = Terrain();
 const timeDisplay = document.querySelector('#timeDisplay');
 const scaleX = 10
 const scaleZ = 10
 
-
 UTILS.addBasicLights({app, position:[0, 200, 0], intensity: 1, distance: 100 });
 
-const cube = new WHS.Box({ // Create box comonent.
+const cube = new WHS.Box({ // Create box component.
   geometry: {
     width: 400,
     height: 100,
     depth: 100
   },
-
   modules: [
     new PHYSICS.BoxModule({
       mass: 0,
@@ -70,22 +76,47 @@ const cube = new WHS.Box({ // Create box comonent.
       //scale: new THREE.Vector3(1, 100, 100)
     })
   ],
-
   material: new THREE.MeshPhongMaterial({
     color: 0xff3333,
   }),
-
   position: new THREE.Vector3(0, -2600, -12000)
 });
 
+const physics = slider.use('physics');
 
-// add things
+// e.g. physics.applyCentralImpulse(v)
+// applyImpulse
+// applyTorque
+// applyCentralForce
+// applyForce
+// setAngularVelocity
+// setLinearVelocity
+// setLinearFactor
+// setDamping
+
+//////////////////////////////////////
+// Add the objects                   
+//////////////////////////////////////
+
 terrain.addTo(app).then(() => {
   //const boxMin = importTerra().geometry.boundingBox.min;
   //cube.position = boxMin.multiplyScalar(scaleX)
   cube.addTo(app)
   slider.addTo(app);
+
+
+  slider.on('collision',  (otherObject, v, r, contactNormal) => {
+    //console.log({otherObject},v, r);
+    let collided;
+    if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
+      collided = true;
+    }
+  });
 });
+
+//////////////////////////////////////
+// Loop and start              
+//////////////////////////////////////
 
 
 const gameLoop = new WHS.Loop((clock) => {
@@ -97,6 +128,8 @@ const gameLoop = new WHS.Loop((clock) => {
   }
   
   timeDisplay.innerHTML = clock.getElapsedTime().toPrecision(3)
+
+  //console.log(physics.getLinearVelocity())
   
 })
 
@@ -104,7 +137,10 @@ gameLoop.start(app);
 
 app.start()
 
-// Event Listeners
+
+//////////////////////////////////////
+// Event Listeners                
+//////////////////////////////////////
 
 document.getElementById('reset').addEventListener('click',()=>{
   app.stop();

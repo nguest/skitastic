@@ -5,10 +5,11 @@ import * as PHYSICS from '../modules/physics-module';
 const scaleX = 10;
 const scaleZ = 10;
 
-const importTerra = () => {
-    return new WHS.Importer({
+const Terrain = () => {
+  return new WHS.Importer({
     //loader: new THREE.JSONLoader(),
     url: './assets/track.json',
+    name: 'terrain',
     modules: [
       new PHYSICS.ConcaveModule({
         friction: 0.9,
@@ -32,7 +33,8 @@ const importTerra = () => {
     },
     rotation: [0, 0, Math.PI/100],
     scale: [scaleX,scaleX,scaleZ]
-  })};
+  })
+};
   
 
-export default importTerra;
+export default Terrain;

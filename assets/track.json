@@ -5,6 +5,7 @@
         "generator":"io_three",
         "uvs":0,
         "version":3,
+        "name": "Terrain",
         "type":"Geometry",
         "faces":11312
     },

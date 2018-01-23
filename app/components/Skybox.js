@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 
 
-const loadSkyBox = (app, scene) => {
+const SkyBox = (app, scene) => {
     const path = './assets/skybox/';
     var cubeMap = new THREE.CubeTextureLoader().load([
         path + '3.jpg',
@@ -54,4 +54,4 @@ const loadSkyBox = (app, scene) => {
    // app.add(skybox)
 }
 
-export default loadSkyBox;
+export default SkyBox;
