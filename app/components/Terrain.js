@@ -5,10 +5,22 @@ import * as PHYSICS from '../modules/physics-module';
 const scaleX = 10;
 const scaleZ = 10;
 
+
+
 const Terrain = () => {
+  const textureMap = new THREE.TextureLoader().load('./assets/textures/UV_Grid_Sm.png', texture => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set( 1, 1 );
+  })
+
+  const material = new THREE.MeshPhongMaterial({color: 0xffffff});
+  const materialWHS = material.clone();
+
+
   return new WHS.Importer({
-    //loader: new THREE.JSONLoader(),
-    url: './assets/track.json',
+    loader: new THREE.JSONLoader(),
+    url: './assets/track2.json',
     name: 'terrain',
     modules: [
       new PHYSICS.ConcaveModule({
@@ -20,19 +32,26 @@ const Terrain = () => {
         scale: new THREE.Vector3(scaleX,scaleX,scaleZ),
   
       }),
+      // new WHS.TextureModule({
+      //   url: './assets/textures/UV_Grid_Sm.png',
+      //   repeat: new THREE.Vector2(10,10),
+      //   // wrapS: THREE.ClampToEdgeWrapping,
+      //   // wrapT: THREE.ClampToEdgeWrapping,
+      // })
     ],
     material: new THREE.MeshPhongMaterial({
-      //color: 0xeeeeee,
-      flatShading: false,
+      color: 0xffffff,
+      //flatShading: false,
       side: THREE.DoubleSide,
-      wireframe: false,
-      specular: 0x555555,
-      map: new THREE.TextureLoader().load('./assets/textures/UV_Grid_Sm.png', texture => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set( 1, 1 );
-      })
+      //wireframe: false,
+      shininess: 80,
+      //specular: 0x999999,
+      //map: textureMap,
     }),
+    shadow: {
+      cast: true,
+      receive: true
+    },    //material: materialWHS,
     position: {
       y: 0
     },

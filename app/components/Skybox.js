@@ -43,7 +43,6 @@ const SkyBox = (app, scene) => {
     var skybox = new THREE.Mesh(new THREE.BoxGeometry(10000, 10000, 10000),
     skyBoxMaterial)
 
-    console.log({skybox})
     //skybox.rotation.set(0, Math.PI/2,0);
 
     skybox.position.set(0,5000,0)

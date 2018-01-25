@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
-//ßimport * as PHYSICS from 'ammonext';
+//import * as PHYSICS from 'ammonext';
 import * as PHYSICS from './modules/physics-module';
 
 
@@ -40,10 +40,10 @@ export const $world = {
 };
 
 export const appDefaults = {
-  camera: {
-    position: new THREE.Vector3(0, 10, 50),
-    far: isMobile ? 200 : 1000
-  },
+  // camera: {
+  //   position: new THREE.Vector3(0, 10, 50),
+  //   far: isMobile ? 200 : 1000
+  // },
 
   rendering: {
     bgColor: 0x162129,
@@ -96,7 +96,7 @@ export function addAmbient(app, intensity) {
 }
 
 export function addBasicLights({app, intensity = 0.5, position = [0, 10, 10], distance = 1000, shadowmap}) {
-  //addAmbient(app, 0.2);
+  addAmbient(app, 0.2);
 
  
 
@@ -104,14 +104,28 @@ export function addBasicLights({app, intensity = 0.5, position = [0, 10, 10], di
 
     color: 0xffffff,
     intensity,
-    distance: 0, 
+    distance, 
     decay: 0.1,
   
     position,
+
+    shadow: Object.assign({
+      fov: 90
+    }, {shadowMap: THREE.PCFSoftShadowMap}),
   
     // target: {
     //   x: 0, y: -20, z: 300
     // }
+  }).addTo(app);
+  return new WHS.PointLight({
+    intensity,
+    distance,
+
+    shadow: Object.assign({
+      fov: 90
+    }, {shadowMap: THREE.PCFSoftShadowMapowMap}),
+
+    position
   }).addTo(app);
 }
 
@@ -136,7 +150,7 @@ export function addPlane(app, size = 100) {
   }).addTo(app);
 }
 
-export function addBoxPlane(app, size = 100, color = 0x447F8B) {
+export function addBoxPlane(app, size = 100, position, color = 0x447F8B) {
   return new WHS.Box({
     geometry: {
       width: size,
@@ -149,6 +163,8 @@ export function addBoxPlane(app, size = 100, color = 0x447F8B) {
         mass: 0
       })
     ],
+
+    position,
 
     material: new THREE.MeshPhongMaterial({color})
   }).addTo(app);
