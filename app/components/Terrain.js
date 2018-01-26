@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 
-const scaleX = 10;
-const scaleZ = 10;
+// const scaleX = 10;
+// const scaleZ = 10;
 
 
 
@@ -29,7 +29,7 @@ const Terrain = () => {
         restitution: 0.5,
         //path: `${process.assetsPath}/models/teapot/utah-teapot-light.json`,
         //scale: new THREE.Vector3(1,1,1)
-        scale: new THREE.Vector3(scaleX,scaleX,scaleZ),
+        //scale: new THREE.Vector3(scaleX,scaleX,scaleZ),
   
       }),
       // new WHS.TextureModule({
@@ -56,7 +56,7 @@ const Terrain = () => {
       y: 0
     },
     rotation: [0, 0, Math.PI/100],
-    scale: [scaleX,scaleX,scaleZ]
+    //scale: [scaleX,scaleX,scaleZ]
   })
 };
   

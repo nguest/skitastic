@@ -55,8 +55,10 @@ export const appDefaults = {
 
       shadowMap: {
         type: isMobile ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap
-      }
-    }
+      },
+      shadow: true,
+    },
+    shadow: true,
   },
 
   physics: {
@@ -98,31 +100,22 @@ export function addAmbient(app, intensity) {
 export function addBasicLights({app, intensity = 0.5, position = [0, 10, 10], distance = 1000, shadowmap}) {
   addAmbient(app, 0.2);
 
- 
 
-  return new WHS.DirectionalLight( {
-
-    color: 0xffffff,
-    intensity,
-    distance, 
-    decay: 0.1,
-  
-    position,
-
-    shadow: Object.assign({
-      fov: 90
-    }, {shadowMap: THREE.PCFSoftShadowMap}),
-  
-    // target: {
-    //   x: 0, y: -20, z: 300
-    // }
-  }).addTo(app);
   return new WHS.PointLight({
     intensity,
     distance,
 
     shadow: Object.assign({
-      fov: 90
+      fov: 90,
+      camera: {
+        near: 0,
+        far: 1000,
+        left: -1000,
+        right: 1000,
+        top: 1000,
+        bottom: -1000,
+
+      }
     }, {shadowMap: THREE.PCFSoftShadowMapowMap}),
 
     position
