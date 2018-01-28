@@ -9,8 +9,8 @@ const Slider = () => {
     return new WHS.Sphere({ // Create sphere comonent.
         geometry: {
             radius: 1,
-            widthSegments: 16,
-            heightSegments: 16
+            widthSegments: 2,
+            heightSegments: 2
         },
         
         modules: [

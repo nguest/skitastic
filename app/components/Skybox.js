@@ -25,17 +25,6 @@ const SkyBox = (app, scene) => {
         side: THREE.BackSide
     });
 
-    // const mesh1 = WHS.MeshComponent.create(
-    //     new THREE.SphereGeometry(1, 32, 32),
-    //     {material}
-    //   );
-    // skyBoxMaterial = new THREE.MeshPhongMaterial({
-    //     color: 0xffffff,
-    //     flatShading: false,
-    //     side: THREE.DoubleSide,
-    //     //wireframe: true,
-    //   });
-
     var skybox = WHS.MeshComponent.create(
         new THREE.BoxGeometry(100, 100, 100),
         skyBoxMaterial
@@ -45,12 +34,11 @@ const SkyBox = (app, scene) => {
 
     //skybox.rotation.set(0, Math.PI/2,0);
 
-    skybox.position.set(0,5000,0)
+    skybox.position.set(0,0,0)
 
     scene.add(skybox)
     
     //skybox.addTo(app);
-   // app.add(skybox)
 }
 
 export default SkyBox;

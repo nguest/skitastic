@@ -7,6 +7,7 @@ class Controls {
         this.mesh = mesh;
         this.params = params;
         this.enabled = enabled;
+        this.skis;
   
         this.velocityFactor = 1;
       
@@ -18,8 +19,7 @@ class Controls {
         this.physics = player.use('physics');
 
         this.pitchObject = new THREE.Object3D();
-      
-        this.pitchObject.add(camera.native);
+        this.pitchObject.add(this.camera.native);
       
         this.yawObject = new THREE.Object3D();
         scene.add(this.yawObject);
@@ -29,8 +29,11 @@ class Controls {
       
         this.quat = new THREE.Quaternion();
 
+        
+        this.createSkis()
 
-      
+        scene.add(this.yawObject);
+        
         let canJump = false;
       
         // Moves.
@@ -59,6 +62,28 @@ class Controls {
     
     }
 
+    createSkis() {
+        // skis
+        const skiGeo = new THREE.BoxBufferGeometry(2,0.2,200);
+        const skiMaterial = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide})
+
+
+        const skiL = new THREE.Mesh(skiGeo, skiMaterial)
+        const skiR = new THREE.Mesh(skiGeo, skiMaterial)
+
+        skiL.position.x = -1.5;
+        skiR.position.x = 1.5;
+        this.skis = new THREE.Object3D();
+        this.skis.add(skiL);
+        this.skis.add(skiR);
+
+
+
+        this.skis.position.y = -8;
+        this.skis.rotation.x = -0.2;
+        this.yawObject.add(this.skis)
+    }
+
     enableTracking(isEnabled) {
         this.enabled = isEnabled;
     }
@@ -84,9 +109,7 @@ class Controls {
         inputVelocity.set(0, 0, 0);
         const euler = new THREE.Euler();
 
-
-        var speed = this.velocityFactor * delta * this.params.speed;
-        //console.log({speed})
+        let speed = this.velocityFactor * delta * this.params.speed;
 
         if (this.moveForward) inputVelocity.z = -speed;
         if (this.moveBackward) inputVelocity.z = speed;
@@ -103,21 +126,24 @@ class Controls {
 
         //console.log(this.physics.getLinearVelocity().z)
         const zVelocity = this.physics.getLinearVelocity().z;
-        this.camera.native.lookAt(this.physics.getLinearVelocity())
-        this.camera.rotation.z = -inputVelocity.x/10; // not working
-
+        //this.camera.native.lookAt(this.physics.getLinearVelocity())
+        this.yawObject.rotation.z = -inputVelocity.x/20
+        this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -inputVelocity.x/20
         
 
         inputVelocity.applyQuaternion(this.quat);
 
         this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: inputVelocity.z});
-        if (zVelocity < -50) {
+        if (zVelocity < -80) {
             //this.physics.setLinearVelocity({...this.physics.getLinearVelocity(), z: -50})
             this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 20});
-        }
-        
+        }        
         //this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });
         //this.physics.setAngularFactor({ x: 0, y: 0, z: 0 });
+    }
+
+    displaySpeed = () => {
+        return this.physics.getLinearVelocity().length()
     }
 
 

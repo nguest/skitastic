@@ -24,21 +24,23 @@ const Gates = (app, vertices) => {
   // make array of actual gate positions on terrain surface
   const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices)) 
   // create gates
-  return gatePositions.map((gate, idx) => new Gate({ app, position: gate, w: gateConfig[idx].w}) )
+  const gates = gatePositions.map((gate, idx) => new Gate({ app, position: gate, w: gateConfig[idx].w, idx}) )
+  return gates;
 }
 
 class Gate {
 
-  constructor({ app, position, w }) {
+  constructor({ app, position, w, idx }) {
     this.app = app;
     this.position = position;
     this.width = w;
+    this.idx = idx;
 
     console.log({ app, position, w })
 
     this.params = {
-      gateHeight: 40,
-      poleHeight: 20,
+      gateHeight: 60,
+      poleHeight: 50,
       poleWidth: 10,
       poleDepth: 2,
     }
@@ -53,11 +55,19 @@ class Gate {
       opacity: 0.3,
     })
 
-    return new WHS.Plane({
+    this.portal = new WHS.Plane({
       geometry: {
         width: this.width,
         height: this.params.gateHeight
       },
+
+      // modules: [
+      //   new PHYSICS.BoxModule({
+      //     mass: 0,
+      //     mask: 1,
+      //     group: 1,
+      //   })
+      // ],
   
       material: portalMaterial,
 
@@ -66,7 +76,16 @@ class Gate {
       // rotation: {
       //   x: -Math.PI / 2
       // }
-    }).addTo(app)
+    })
+
+    this.portal.native.name = 'gate-' + this.idx
+    
+    this.portal.addTo(app)
+  }
+
+
+  getPortalObject() {
+    return this.portal.native;
   }
 
   createPoles = (app) => {

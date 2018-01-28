@@ -62,7 +62,7 @@ export const appDefaults = {
   },
 
   physics: {
-    ammo: process.ammoPath
+    ammo: 'http://localhost:8085/ammo.js'
   }
 };
 

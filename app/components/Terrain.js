@@ -18,10 +18,9 @@ const Terrain = () => {
   const materialWHS = material.clone();
 
 
-  return new WHS.Importer({
+  const terrain = new WHS.Importer({
     loader: new THREE.JSONLoader(),
     url: './assets/track2.json',
-    name: 'terrain',
     modules: [
       new PHYSICS.ConcaveModule({
         friction: 0.9,
@@ -32,22 +31,22 @@ const Terrain = () => {
         //scale: new THREE.Vector3(scaleX,scaleX,scaleZ),
   
       }),
-      // new WHS.TextureModule({
-      //   url: './assets/textures/UV_Grid_Sm.png',
-      //   repeat: new THREE.Vector2(10,10),
-      //   // wrapS: THREE.ClampToEdgeWrapping,
-      //   // wrapT: THREE.ClampToEdgeWrapping,
-      // })
+      new WHS.TextureModule({
+        url: './assets/textures/UV_Grid_Sm.png',
+        repeat: new THREE.Vector2(10,10),
+        // wrapS: THREE.ClampToEdgeWrapping,
+        // wrapT: THREE.ClampToEdgeWrapping,
+      })
     ],
-    material: new THREE.MeshPhongMaterial({
-      color: 0xffffff,
-      //flatShading: false,
-      side: THREE.DoubleSide,
-      //wireframe: false,
-      shininess: 80,
-      //specular: 0x999999,
-      //map: textureMap,
-    }),
+    // material: new THREE.MeshPhongMaterial({
+    //   color: 0xffffff,
+    //   //flatShading: false,
+    //   side: THREE.DoubleSide,
+    //   //wireframe: false,
+    //   shininess: 80,
+    //   //specular: 0x999999,
+    //   //map: textureMap,
+    // }),
     shadow: {
       cast: true,
       receive: true
@@ -58,6 +57,11 @@ const Terrain = () => {
     rotation: [0, 0, Math.PI/100],
     //scale: [scaleX,scaleX,scaleZ]
   })
+
+  console.log({terrain})
+  //terrain.native.name = "terrain"
+
+  return terrain;
 };
   
 

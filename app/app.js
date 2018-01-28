@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import * as UTILS from './globals';
 import * as WHS from 'whs';
-import * as PHYSICS from './modules/physics-module';
+import * as PHYSICS from './modules/physics-module-2';
+//import * as PHYSICS from 'physics-module-ammonext';
 import StatsModule from './modules/StatsModule';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
+import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
 
@@ -20,6 +22,7 @@ const scene = new THREE.Scene();
 
 let firstPerson = false;
 let gameInProgress = false;
+const speedDisplay =  document.querySelector('#speedDisplay');
 
 let activeCamera = new WHS.DefineModule('camera',
   new WHS.PerspectiveCamera({
@@ -32,6 +35,8 @@ let activeCamera = new WHS.DefineModule('camera',
   })
 );
 
+const worldModule = new PHYSICS.WorldModule(UTILS.appDefaults.physics);
+
 const app = new WHS.App([
   new WHS.ElementModule(),
   new WHS.SceneModule(),
@@ -40,38 +45,19 @@ const app = new WHS.App([
 
 
 app.setScene(scene);
-/*new App([
-  *   new ElementModule(),
-  *   new SceneModule(),
-  *   new DefineModule('camera', new PerspectiveCamera({
-  *     position: new THREE.Vector3(0, 6, 18),
-  *     far: 10000
-  *   })),
-  *   new RenderingModule({
-  *     bgColor: 0x162129,
-  *
-  *     renderer: {
-  *       antialias: true
-  *     }
-  *   }, 
-      {shadow: true})
-  * ]);
-  */
+
 app
   .module(
     new WHS.RenderingModule({ 
     ...UTILS.appDefaults.rendering, 
-    //shadow: true,
     shadow: true,
     bgColor: 0xaaddff,
     }),
   )
-  .module(new PHYSICS.WorldModule(UTILS.appDefaults.physics))
+  .module(worldModule)
   .module(new WHS.OrbitControlsModule())
   .module(new WHS.ResizeModule())
   .module(new StatsModule())
-
-
 
 
 
@@ -83,27 +69,23 @@ const camera = app.manager.get('camera')
 const skyBox = SkyBox(app, scene);
 const slider = Slider();
 const terrain = Terrain();
+const lights = Lights(app);
 const timeDisplay = document.querySelector('#timeDisplay');
-const scaleX = 10
-const scaleZ = 10
-
-UTILS.addBasicLights({app, position: new THREE.Vector3(50, 1000, 0), intensity: 0.7,});
-
 
 
 const sph = new WHS.Sphere({ // Create sphere comonent.
   geometry: {
-      radius: 10,
-      widthSegments: 16,
-      heightSegments: 16
+    radius: 10,
+    widthSegments: 16,
+    heightSegments: 16
   },
   
   modules: [
-      new PHYSICS.SphereModule({
-      mass: 20,
-      restitution: 0.9,
-      friction: 1,
-      })
+    new PHYSICS.SphereModule({
+    mass: 20,
+    restitution: 0.9,
+    friction: 1,
+    })
   ],
   shadow: {
     cast: true,
@@ -141,59 +123,30 @@ let controls;
   controls = new Controls(scene, app.camera, slider, false);
 //}
 
-
-const light = new WHS.DirectionalLight( {
-
-  color: 0xffffff,
-  intensity: 0.4,
-  distance: 300,
-  decay: 0.1,
-
-  position: [0,500,0],
-
-  shadow: Object.assign({
-    fov: 90,
-    camera: {
-      near: 0,
-      far: 500,
-      left: -500,
-      right: 500,
-      top: 500,
-      bottom: -500,
-
-    }
-  }, {shadowMap: THREE.PCFSoftShadowMap}),
-  
-  // target: {
-  //   x: 0, y: -20, z: 300
-  // }
-})
-light.addTo(app);
-
-const helper = new THREE.DirectionalLightHelper(light.native)
-scene.add(helper)
+let collidableMeshList = [];
 
 terrain.addTo(app)
 .then(() => {
-  // const helper = new THREE.FaceNormalsHelper(terrain.native)
-  // scene.add(helper)
+  terrain.native.name = 'terrain';
   
-  Gates(app, terrain.native.geometry.vertices);
+  const gates = Gates(app, terrain.native.geometry.vertices);
+  console.log(gates[0].getPortalObject())
   slider.addTo(app);
 
   slider.on('collision',  (otherObject, v, r, contactNormal) => {
-    //console.log({otherObject},v, r);
+    console.log(otherObject.name);
     let collided;
     if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
       collided = true;
-      console.log('collision!',otherObject)
+      //console.log('collision!',otherObject)
     }
   });
 
+  collidableMeshList = gates.map(gate => gate.getPortalObject())
 
   app.start()
   console.log({PHYSICS})
-
+  console.log({worldModule})
 });
 
 //////////////////////////////////////
@@ -203,18 +156,46 @@ terrain.addTo(app)
 
 const gameLoop = new WHS.Loop((clock) => {
 
-  controls.update(clock.getElapsedTime())
+  const delta = clock.getElapsedTime();
 
+  controls.update(delta);
 
   camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
 
+  displayStatus(delta);
 
-  timeDisplay.innerHTML = clock.getElapsedTime().toPrecision(3)
-
-  //console.log(physics.getLinearVelocity())
+  detectGateCollisions();
   
 })
 
+const displayStatus = (delta) => {
+  speedDisplay.innerHTML = parseInt(controls.displaySpeed());
+  timeDisplay.innerHTML = delta.toFixed(2)
+
+}
+
+const detectGateCollisions = () => {
+// collision detection:
+	//   determines if any of the rays from the cube's origin to each vertex
+	//		intersects any face of a mesh in the array of target meshes
+	//   for increased collision accuracy, add more vertices to the cube;
+	//		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
+  //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+  const sliderMesh = slider.native;
+  const originPoint = sliderMesh.position.clone();
+  
+  sliderMesh.geometry.vertices.map(vertex => {
+    const localVertex = vertex.clone();
+		const globalVertex = localVertex.applyMatrix4( sliderMesh.matrix );
+		const directionVector = globalVertex.sub( sliderMesh.position );
+		
+		const ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+		const collisionResults = ray.intersectObjects( collidableMeshList );
+		if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+			console.log(" Hit ", collisionResults[0].object.name);
+    }
+  })
+}
 
 
 
@@ -226,84 +207,34 @@ const gameLoop = new WHS.Loop((clock) => {
 
 document.getElementById('reset').addEventListener('click',()=>{
   //app.stop();
+  worldModule.simulateLoop.stop()
+  gameLoop.stop(app)
   slider.position.set(-1, 0, 0);
-  app.start();
+  //app.start();
+  worldModule.simulateLoop.start()
+  gameLoop.start(app)
 })
 document.getElementById('camera').addEventListener('click',()=>{
   firstPerson = !firstPerson;
   console.log(app, firstPerson, app.camera)
 
-  firstPerson ? app.start() : staticApp.start()
+  app.start();
 })
 document.addEventListener('keydown', (e) => {
   if (e.keyCode === 32) {
     console.log({gameInProgress})
 
     if (gameInProgress) {
+      worldModule.simulateLoop.stop()
       gameLoop.stop(app)
     } else {
       controls.enableTracking(true)
-
+      worldModule.simulateLoop.start()
       gameLoop.start(app);
     }
     gameInProgress = !gameInProgress;
-
-
     //controls.enableTracking(!gameInProgress)
 
     
   }
 })
-
-
-
-/*
-const cube = new WHS.Box({ // Create box component.
-  geometry: {
-    width: 400,
-    height: 100,
-    depth: 100
-  },
-  modules: [
-    new PHYSICS.BoxModule({
-      mass: 0,
-      restitution: 1,
-      friction: 1,
-      //scale: new THREE.Vector3(1, 100, 100)
-    })
-  ],
-  material: new THREE.MeshPhongMaterial({
-    color: 0xff3333,
-  }),
-  shadow: {
-    cast: true,
-    receive: true
-  },
-
-  position: new THREE.Vector3(0, -2600, -12000)
-});
-
-const box = new WHS.Box({ // Create box comonent.
-  geometry: [10, 10, 10],
-
-  material: new THREE.MeshPhongMaterial({
-    color: 0xff7777,
-  }),
-  modules: [
-    new WHS.TextureModule({
-      url: `./assets/textures/UV_Grid_Sm.png`,
-      repeat: new THREE.Vector2(10,10)
-    })
-  ],
-  shadow: {
-    cast: true,
-    receive: true
-  },
-
-  position: [-10, -40, -200]
-});
-
-console.log(box)
-
-box.addTo(app);
-*/
