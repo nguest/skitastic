@@ -1,8 +1,19 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
+import TWEEN from '@tweenjs/tween.js';
+
+// e.g. physics.applyCentralImpulse(v)
+// applyImpulse
+// applyTorque
+// applyCentralForce
+// applyForce
+// setAngularVelocity
+// setLinearVelocity
+// setLinearFactor
+// setDamping
 
 class Controls {
-    constructor(scene, camera, mesh, enabled, params = { ypos: 10 , speed: 10 }) {
+    constructor(scene, camera, mesh, enabled, params = { ypos: 0 , speed: 15 }) {
         this.camera = camera;
         this.mesh = mesh;
         this.params = params;
@@ -12,7 +23,7 @@ class Controls {
         this.velocityFactor = 1;
       
         this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
-        this.camera.position.set(0, 0, 0);
+        this.camera.position.set(0, 20, 0);
       
         /* Init */
         const player = this.mesh;
@@ -28,12 +39,25 @@ class Controls {
         this.yawObject.add(this.pitchObject);
       
         this.quat = new THREE.Quaternion();
-
         
-        this.createSkis()
+        this.createSkis();
+
+
+        var position = { x : 0, y: 300 };
+       // var target = { x : 400, y: 50 };
+        const rotation = 0;
+        const target = 0.25;
+        
+        // this.tween = new TWEEN.Tween(rotation).to(target, 1000)
+        // .onUpdate(function() { // Called after tween.js updates 'coords'.
+        // // Move 'box' to the position described by 'coords' with a CSS translation.
+        //    // box.style.setProperty('transform', 'translate(' + coords.x + 'px, ' + coords.y + 'px)');
+        //     this.yawObject.rotation.z = rotation
+        //     console.log({rotation})
+        // })
 
         scene.add(this.yawObject);
-        
+
         let canJump = false;
       
         // Moves.
@@ -42,23 +66,7 @@ class Controls {
         this.moveLeft = false;
         this.moveRight = false;
       
-        player.on('collision', (otherObject, v, r, contactNormal) => {
-          //console.log(contactNormal.y);
-          if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
-            canJump = true;
-          }
-        });
-
-        this.addListeners();
-
-        player.on('physics:added', () => {
-            player.manager.get('module:world').addEventListener('update', () => {
-            if (this.enabled === false) return;
-            this.yawObject.position.copy(player.position);
-            this.yawObject.position.y = this.yawObject.position.y + this.params.ypos
-            
-            });
-        });
+        this.addListeners(player)
     
     }
 
@@ -71,27 +79,49 @@ class Controls {
         const skiL = new THREE.Mesh(skiGeo, skiMaterial)
         const skiR = new THREE.Mesh(skiGeo, skiMaterial)
 
+        skiL.castShadow = true;
+        skiR.castShadow = true;
+
+
         skiL.position.x = -1.5;
         skiR.position.x = 1.5;
         this.skis = new THREE.Object3D();
         this.skis.add(skiL);
         this.skis.add(skiR);
 
-
-
-        this.skis.position.y = -8;
+        this.skis.position.y = -5;
         this.skis.rotation.x = -0.2;
         this.yawObject.add(this.skis)
+
+
+        //console.log(thi)
+
     }
 
     enableTracking(isEnabled) {
         this.enabled = isEnabled;
+        //this.physics.setLinearVelocity(0,0,-0.1)
     }
 
-    addListeners() {
-        document.addEventListener('mousemove', this.onMouseMove, false);
+    addListeners(player) {
+       // document.addEventListener('mousemove', this.onMouseMove, false);
         document.addEventListener('keydown', this.onKeyDown, false);
         document.addEventListener('keyup', this.onKeyUp, false);
+        player.on('collision', (otherObject, v, r, contactNormal) => {
+        //console.log(contactNormal.y);
+            if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
+              //canJump = true;
+            }
+        });
+  
+        player.on('physics:added', () => {
+            player.manager.get('module:world').addEventListener('update', () => {
+            if (this.enabled === false) return;
+            this.yawObject.position.copy(player.position);
+            this.yawObject.position.y = this.yawObject.position.y + this.params.ypos
+            
+            });
+        });
     }
 
     getDirection(targetVec) {
@@ -107,6 +137,7 @@ class Controls {
 
         const inputVelocity = new THREE.Vector3();
         inputVelocity.set(0, 0, 0);
+        
         const euler = new THREE.Euler();
 
         let speed = this.velocityFactor * delta * this.params.speed;
@@ -121,32 +152,44 @@ class Controls {
         euler.y = this.yawObject.rotation.y;
         euler.order = 'XYZ';
 
+ 
 
         this.quat.setFromEuler(euler);
 
-        //console.log(this.physics.getLinearVelocity().z)
-        const zVelocity = this.physics.getLinearVelocity().z;
-        //this.camera.native.lookAt(this.physics.getLinearVelocity())
-        this.yawObject.rotation.z = -inputVelocity.x/20
-        this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -inputVelocity.x/20
+        const vN = this.physics.getLinearVelocity().clone();
+        vN.normalize()
+
+        if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
+        const pos = this.yawObject.position;
+        this.camera.native.lookAt(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+        this.skis.lookAt(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+
+        this.camera.native.updateProjectionMatrix()
+        
+        this.yawObject.rotation.z = -inputVelocity.x/70
+
+       // if (this.moveRight) this.tween.start();
+        //TWEEN.update(delta);
+
+        this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = inputVelocity.x/20
         
 
         inputVelocity.applyQuaternion(this.quat);
 
         this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: inputVelocity.z});
-        if (zVelocity < -80) {
+
+        if (this.physics.getLinearVelocity().clone().z < -80) {
             //this.physics.setLinearVelocity({...this.physics.getLinearVelocity(), z: -50})
-            this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 20});
+            this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 10});
         }        
         //this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });
         //this.physics.setAngularFactor({ x: 0, y: 0, z: 0 });
     }
 
+
     displaySpeed = () => {
-        return this.physics.getLinearVelocity().length()
+        return this.physics.getLinearVelocity().clone().length()
     }
-
-
 
     onMouseMove = (event) => {
         if (this.enabled === false) return;

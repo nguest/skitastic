@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 //import * as PHYSICS from 'ammonext';
-import * as PHYSICS from './modules/physics-module';
+import * as PHYSICS from './modules/physics-module-2';
 
 
 const isMobile = (function() {
@@ -116,7 +116,7 @@ export function addBasicLights({app, intensity = 0.5, position = [0, 10, 10], di
         bottom: -1000,
 
       }
-    }, {shadowMap: THREE.PCFSoftShadowMapowMap}),
+    }, {shadowMap: THREE.PCFSoftShadowMap}),
 
     position
   }).addTo(app);

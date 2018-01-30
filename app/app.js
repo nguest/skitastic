@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import * as UTILS from './globals';
+import APPCONFIG from './AppConfig';
 import * as WHS from 'whs';
 import * as PHYSICS from './modules/physics-module-2';
-//import * as PHYSICS from 'physics-module-ammonext';
 import StatsModule from './modules/StatsModule';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
@@ -35,7 +34,7 @@ let activeCamera = new WHS.DefineModule('camera',
   })
 );
 
-const worldModule = new PHYSICS.WorldModule(UTILS.appDefaults.physics);
+const worldModule = new PHYSICS.WorldModule(APPCONFIG.appDefaults.physics);
 
 const app = new WHS.App([
   new WHS.ElementModule(),
@@ -49,17 +48,19 @@ app.setScene(scene);
 app
   .module(
     new WHS.RenderingModule({ 
-    ...UTILS.appDefaults.rendering, 
+    ...APPCONFIG.appDefaults.rendering, 
     shadow: true,
+    shadowMap: { enabled: true},
     bgColor: 0xaaddff,
     }),
   )
   .module(worldModule)
-  .module(new WHS.OrbitControlsModule())
+  //.module(new WHS.OrbitControlsModule())
   .module(new WHS.ResizeModule())
   .module(new StatsModule())
 
-
+// renderer shadow hack
+app.modules[3].renderer.shadowMap.enabled = true;
 
 //////////////////////////////////////
 // Get the objects                   
@@ -69,7 +70,7 @@ const camera = app.manager.get('camera')
 const skyBox = SkyBox(app, scene);
 const slider = Slider();
 const terrain = Terrain();
-const lights = Lights(app);
+const lights = Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
 
 
@@ -99,23 +100,41 @@ const sph = new WHS.Sphere({ // Create sphere comonent.
   
   position: [20, -40, -300]
 })
+console.log({sph})
 sph.addTo(app);
 
-//const sliderPhysics = slider.use('physics');
 
-// e.g. physics.applyCentralImpulse(v)
-// applyImpulse
-// applyTorque
-// applyCentralForce
-// applyForce
-// setAngularVelocity
-// setLinearVelocity
-// setLinearFactor
-// setDamping
 
 //////////////////////////////////////
 // Add the objects                   
 //////////////////////////////////////
+
+const initWorld = () => {
+  terrain.addTo(app)
+  .then(() => {
+    terrain.native.name = 'terrain';
+
+    console.log({scene})
+
+    
+    const gates = Gates(app, terrain.native.geometry.vertices);
+    slider.addTo(app);
+  
+    slider.on('collision',  (otherObject, v, r, contactNormal) => {
+      console.log(otherObject.name);
+      let collided;
+      if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
+        collided = true;
+        //console.log('collision!',otherObject)
+      }
+    });
+  
+    collidableMeshList = gates.map(gate => gate.getPortalObject())
+  
+    app.start();
+    worldModule.simulateLoop.stop();
+  });
+}
 
 app.camera = camera;
 let controls;
@@ -124,30 +143,10 @@ let controls;
 //}
 
 let collidableMeshList = [];
+initWorld();
 
-terrain.addTo(app)
-.then(() => {
-  terrain.native.name = 'terrain';
-  
-  const gates = Gates(app, terrain.native.geometry.vertices);
-  console.log(gates[0].getPortalObject())
-  slider.addTo(app);
 
-  slider.on('collision',  (otherObject, v, r, contactNormal) => {
-    console.log(otherObject.name);
-    let collided;
-    if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
-      collided = true;
-      //console.log('collision!',otherObject)
-    }
-  });
 
-  collidableMeshList = gates.map(gate => gate.getPortalObject())
-
-  app.start()
-  console.log({PHYSICS})
-  console.log({worldModule})
-});
 
 //////////////////////////////////////
 // Loop and start              
@@ -160,7 +159,7 @@ const gameLoop = new WHS.Loop((clock) => {
 
   controls.update(delta);
 
-  camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
+  //camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
 
   displayStatus(delta);
 
@@ -206,11 +205,9 @@ const detectGateCollisions = () => {
 //////////////////////////////////////
 
 document.getElementById('reset').addEventListener('click',()=>{
-  //app.stop();
   worldModule.simulateLoop.stop()
   gameLoop.stop(app)
   slider.position.set(-1, 0, 0);
-  //app.start();
   worldModule.simulateLoop.start()
   gameLoop.start(app)
 })

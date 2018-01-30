@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/WhitestormJS/whitestorm-app-boilerplate#readme",
   "dependencies": {
+    "@tweenjs/tween.js": "^17.2.0",
     "physics-module-ammonext": "^0.1.2-fix.1",
     "present": "^1.0.0",
     "three": "^0.89.0",

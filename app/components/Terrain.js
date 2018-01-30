@@ -14,7 +14,7 @@ const Terrain = () => {
     texture.repeat.set( 1, 1 );
   })
 
-  const material = new THREE.MeshPhongMaterial({color: 0xffffff});
+  const material = new THREE.MeshPhongMaterial({color: 0xffffff, flatShading: true});
   const materialWHS = material.clone();
 
 
@@ -31,13 +31,14 @@ const Terrain = () => {
         //scale: new THREE.Vector3(scaleX,scaleX,scaleZ),
   
       }),
-      new WHS.TextureModule({
-        url: './assets/textures/UV_Grid_Sm.png',
-        repeat: new THREE.Vector2(10,10),
-        // wrapS: THREE.ClampToEdgeWrapping,
-        // wrapT: THREE.ClampToEdgeWrapping,
-      })
+      // new WHS.TextureModule({
+      //   url: './assets/textures/UV_Grid_Sm.png',
+      //   repeat: new THREE.Vector2(10,10),
+      //   // wrapS: THREE.ClampToEdgeWrapping,
+      //   // wrapT: THREE.ClampToEdgeWrapping,
+      // })
     ],
+    //material,
     // material: new THREE.MeshPhongMaterial({
     //   color: 0xffffff,
     //   //flatShading: false,
@@ -57,6 +58,8 @@ const Terrain = () => {
     rotation: [0, 0, Math.PI/100],
     //scale: [scaleX,scaleX,scaleZ]
   })
+
+  //terrain.receiveShadow = true;
 
   console.log({terrain})
   //terrain.native.name = "terrain"

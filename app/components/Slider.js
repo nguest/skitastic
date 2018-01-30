@@ -8,7 +8,7 @@ const scaleZ = 10;
 const Slider = () => {
     return new WHS.Sphere({ // Create sphere comonent.
         geometry: {
-            radius: 1,
+            radius: 5,
             widthSegments: 2,
             heightSegments: 2
         },
@@ -24,9 +24,14 @@ const Slider = () => {
         material: new THREE.MeshPhongMaterial({
           //color: UTILS.$colors.mesh
         }),
+
+        shadow: {
+            cast: true,
+            receive: true,
+        },
         
         
-        position: new THREE.Vector3(-1, 0, 0)
+        position: new THREE.Vector3(0, 5, 0)
     })
 };
   

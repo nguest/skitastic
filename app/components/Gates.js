@@ -1,14 +1,14 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
-
+import { gateConfig } from '../AppConfig';
 
 // array of gate objects with x and z posns
-const gateConfig = [
-  {x:50, z: -500, w: 100},
-  {x:20, z: -1000, w: 100},
-  {x:40, z: -3000, w: 100}
-]
+// const gateConfig = [
+//   {x:50, z: -500, w: 100},
+//   {x:20, z: -1000, w: 100},
+//   {x:40, z: -3000, w: 100}
+// ]
 
 // reduces to a 3d object with x,y,z
 const makeGatePosition = (goal, vertices) => {
