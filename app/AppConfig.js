@@ -18,7 +18,8 @@ const APPCONFIG = {
         antialias: !isMobile,
   
         shadowMap: {
-          type: isMobile ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap
+          type: isMobile ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap,
+          enabled: true,
         },
         shadow: true,
       },
@@ -35,7 +36,11 @@ const APPCONFIG = {
 export const gateConfig = [
   {x:50, z: -500, w: 100},
   {x:20, z: -1000, w: 100},
-  {x:40, z: -3000, w: 100}
+  {x:40, z: -1500, w: 100},
+  {x:0, z: -2000, w: 70},
+  {x:-50, z: -3000, w: 70},
+  {x:20, z: -8000, w: 100},
+   
 ]
 
 export default APPCONFIG;

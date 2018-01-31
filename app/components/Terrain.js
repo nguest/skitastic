@@ -62,6 +62,7 @@ const Terrain = () => {
   //terrain.receiveShadow = true;
 
   console.log({terrain})
+  
   //terrain.native.name = "terrain"
 
   return terrain;

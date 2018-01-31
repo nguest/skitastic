@@ -3,13 +3,6 @@ import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 import { gateConfig } from '../AppConfig';
 
-// array of gate objects with x and z posns
-// const gateConfig = [
-//   {x:50, z: -500, w: 100},
-//   {x:20, z: -1000, w: 100},
-//   {x:40, z: -3000, w: 100}
-// ]
-
 // reduces to a 3d object with x,y,z
 const makeGatePosition = (goal, vertices) => {
   return vertices.reduce((acc, curr) => ( 
@@ -41,7 +34,7 @@ class Gate {
     this.params = {
       gateHeight: 60,
       poleHeight: 50,
-      poleWidth: 10,
+      poleWidth: 15,
       poleDepth: 2,
     }
     this.createPortal(app);
@@ -52,7 +45,7 @@ class Gate {
     const portalMaterial = new THREE.MeshPhongMaterial({
       color: 0xffaabb,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.15,
     })
 
     this.portal = new WHS.Plane({
@@ -90,7 +83,11 @@ class Gate {
 
   createPoles = (app) => {
     const poleMaterial = new THREE.MeshPhongMaterial({
-      color: 0xffaabb,
+      //color: 0xffaabb,
+      map: new THREE.TextureLoader().load('./assets/textures/flag.png'),
+      transparent: true,
+      //emissive: 0x222222,
+      specular: 0x666666,
     })
 
     const geometry = {
@@ -98,6 +95,9 @@ class Gate {
       height: this.params.poleHeight, 
       depth: this. params.poleDepth
     }
+    const rotation = [
+      0,0,0//Math.PI,
+    ]
 
     const modules = [
       new PHYSICS.BoxModule({
@@ -113,22 +113,24 @@ class Gate {
     };
 
 
-    const poleL = new WHS.Box({
+    const poleL = new WHS.Plane({
       geometry,
       position: [
         this.position.x - (this.width + this.params.poleWidth)/2,
-        this.position.y,
+        this.position.y + 20,
         this.position.z
       ],
+      rotation,
       modules,
       material: poleMaterial,
       shadow,
     })
-    const poleR = new WHS.Box({
+    const poleR = new WHS.Plane({
       geometry,
+      rotation,
       position: [
         this.position.x + (this.width + this.params.poleWidth)/2,
-        this.position.y,
+        this.position.y + 20,
         this.position.z
       ],
       modules,

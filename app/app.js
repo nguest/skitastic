@@ -30,7 +30,7 @@ let activeCamera = new WHS.DefineModule('camera',
     rotation: new THREE.Vector3(0, 0, 0),
     far: 25000,
     near: 0.1,
-    fov: 25,
+    fov: 35,
   })
 );
 
@@ -55,7 +55,7 @@ app
     }),
   )
   .module(worldModule)
-  //.module(new WHS.OrbitControlsModule())
+ .module(new WHS.OrbitControlsModule())
   .module(new WHS.ResizeModule())
   .module(new StatsModule())
 
@@ -67,12 +67,12 @@ app.modules[3].renderer.shadowMap.enabled = true;
 //////////////////////////////////////
 
 const camera = app.manager.get('camera')
-const skyBox = SkyBox(app, scene);
+const skybox = new SkyBox(app, scene);
 const slider = Slider();
 const terrain = Terrain();
-const lights = Lights(app, scene);
+const lights = new Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
-
+console.log(lights.getShadowCamera())
 
 const sph = new WHS.Sphere({ // Create sphere comonent.
   geometry: {
@@ -100,7 +100,6 @@ const sph = new WHS.Sphere({ // Create sphere comonent.
   
   position: [20, -40, -300]
 })
-console.log({sph})
 sph.addTo(app);
 
 
@@ -113,6 +112,7 @@ const initWorld = () => {
   terrain.addTo(app)
   .then(() => {
     terrain.native.name = 'terrain';
+    console.log(terrain.native.material)
 
     console.log({scene})
 
@@ -139,7 +139,14 @@ const initWorld = () => {
 app.camera = camera;
 let controls;
 //if (gameInProgress) {
-  controls = new Controls(scene, app.camera, slider, false);
+  controls = new Controls({
+    scene, 
+    camera: app.camera, 
+    mesh: slider, 
+    skybox: skybox.getCube(),
+    enabled: false,
+    light: lights.getDLight()
+  });
 //}
 
 let collidableMeshList = [];
@@ -158,6 +165,10 @@ const gameLoop = new WHS.Loop((clock) => {
   const delta = clock.getElapsedTime();
 
   controls.update(delta);
+
+
+
+
 
   //camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
 
@@ -219,7 +230,6 @@ document.getElementById('camera').addEventListener('click',()=>{
 })
 document.addEventListener('keydown', (e) => {
   if (e.keyCode === 32) {
-    console.log({gameInProgress})
 
     if (gameInProgress) {
       worldModule.simulateLoop.stop()
@@ -230,6 +240,8 @@ document.addEventListener('keydown', (e) => {
       gameLoop.start(app);
     }
     gameInProgress = !gameInProgress;
+    console.log({gameInProgress})
+
     //controls.enableTracking(!gameInProgress)
 
     
