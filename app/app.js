@@ -5,11 +5,13 @@ import * as PHYSICS from './modules/physics-module-2';
 import StatsModule from './modules/StatsModule';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
+import Trees from './components/Trees';
+
 import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
 
-
+import Misc from './components/Misc';
 import Controls from './modules/Controls';
 
 
@@ -19,7 +21,7 @@ import Controls from './modules/Controls';
 
 const scene = new THREE.Scene();
 
-let firstPerson = false;
+let firstPerson = true;
 let gameInProgress = false;
 const speedDisplay =  document.querySelector('#speedDisplay');
 
@@ -55,7 +57,7 @@ app
     }),
   )
   .module(worldModule)
- .module(new WHS.OrbitControlsModule())
+  .module(new WHS.OrbitControlsModule())
   .module(new WHS.ResizeModule())
   .module(new StatsModule())
 
@@ -66,42 +68,17 @@ app.modules[3].renderer.shadowMap.enabled = true;
 // Get the objects                   
 //////////////////////////////////////
 
+
 const camera = app.manager.get('camera')
 const skybox = new SkyBox(app, scene);
 const slider = Slider();
 const terrain = Terrain();
+const trees = Trees();
 const lights = new Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
 console.log(lights.getShadowCamera())
 
-const sph = new WHS.Sphere({ // Create sphere comonent.
-  geometry: {
-    radius: 10,
-    widthSegments: 16,
-    heightSegments: 16
-  },
-  
-  modules: [
-    new PHYSICS.SphereModule({
-    mass: 20,
-    restitution: 0.9,
-    friction: 1,
-    })
-  ],
-  shadow: {
-    cast: true,
-    receive: true
-  },
-  
-  material: new THREE.MeshPhongMaterial({
-    //color: UTILS.$colors.mesh
-  }),
-  
-  
-  position: [20, -40, -300]
-})
-sph.addTo(app);
-
+const misc = Misc(app)
 
 
 //////////////////////////////////////
@@ -110,15 +87,18 @@ sph.addTo(app);
 
 const initWorld = () => {
   terrain.addTo(app)
+  .then(() => trees.addTo(app))
   .then(() => {
+    trees.native.material.transparent = true;
+
     terrain.native.name = 'terrain';
     console.log(terrain.native.material)
 
     console.log({scene})
 
-    
+    slider.addTo(app)
     const gates = Gates(app, terrain.native.geometry.vertices);
-    slider.addTo(app);
+    //slider.addTo(app);
   
     slider.on('collision',  (otherObject, v, r, contactNormal) => {
       console.log(otherObject.name);
@@ -138,7 +118,7 @@ const initWorld = () => {
 
 app.camera = camera;
 let controls;
-//if (gameInProgress) {
+if (firstPerson) {
   controls = new Controls({
     scene, 
     camera: app.camera, 
@@ -147,11 +127,10 @@ let controls;
     enabled: false,
     light: lights.getDLight()
   });
-//}
+}
 
 let collidableMeshList = [];
 initWorld();
-
 
 
 
@@ -164,11 +143,7 @@ const gameLoop = new WHS.Loop((clock) => {
 
   const delta = clock.getElapsedTime();
 
-  controls.update(delta);
-
-
-
-
+  if (firstPerson) controls.update(delta);
 
   //camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
 
@@ -235,7 +210,7 @@ document.addEventListener('keydown', (e) => {
       worldModule.simulateLoop.stop()
       gameLoop.stop(app)
     } else {
-      controls.enableTracking(true)
+      if (firstPerson) controls.enableTracking(true)
       worldModule.simulateLoop.start()
       gameLoop.start(app);
     }

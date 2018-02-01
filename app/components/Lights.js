@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
+import isDev from '../AppConfig';
 
 //const Lights = (app, scene) => {
 
@@ -28,10 +29,8 @@ class Lights {
           right: l,
           top: l,
           bottom: -l,
-
-
         },
-        //radius: 10,
+        //radius: 0.1,
         mapSize: {
           width: Math.pow(2,pow),
           height: Math.pow(2,pow),
@@ -43,9 +42,9 @@ class Lights {
 
     //this.dlight.
     const helper = new THREE.DirectionalLightHelper(this.dlight.native)
-    scene.add(helper)
+    if (isDev) scene.add(helper)
     const helper2 = new THREE.CameraHelper(this.dlight.native.shadow.camera)
-    scene.add(helper2)
+    if (isDev) scene.add(helper2)
 
     const ambient = new WHS.AmbientLight({
       intensity: 0.2
@@ -55,11 +54,11 @@ class Lights {
 
 
   getShadowCamera() {
-    this.dlight.native.shadow.camera.name = 'hello'
+    this.dlight.native.shadow.camera.name = 'shadowCamera'
     return this.dlight.native.shadow.camera;
   }
   getDLight() {
-    this.dlight.native.shadow.camera.name = 'hello'
+    this.dlight.native.shadow.camera.name = 'dLight'
     return this.dlight.native;
   }
 

@@ -2,12 +2,8 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 
-// const scaleX = 10;
-// const scaleZ = 10;
 
-
-
-const Terrain = () => {
+const Trees = () => {
   // const textureMap = new THREE.TextureLoader().load('./assets/textures/UV_Grid_Sm.png', texture => {
   //   texture.wrapS = THREE.RepeatWrapping;
   //   texture.wrapT = THREE.RepeatWrapping;
@@ -18,9 +14,9 @@ const Terrain = () => {
   const materialWHS = material.clone();
 
 
-  const terrain = new WHS.Importer({
+  const tree = new WHS.Importer({
     loader: new THREE.JSONLoader(),
-    url: './assets/track2.json',
+    url: './assets/tree.json',
     modules: [
       new PHYSICS.ConcaveModule({
         friction: 0.9,
@@ -29,7 +25,6 @@ const Terrain = () => {
         //path: `${process.assetsPath}/models/teapot/utah-teapot-light.json`,
         //scale: new THREE.Vector3(1,1,1)
         //scale: new THREE.Vector3(scaleX,scaleX,scaleZ),
-  
       }),
       // new WHS.TextureModule({
       //   url: './assets/textures/UV_Grid_Sm.png',
@@ -53,20 +48,21 @@ const Terrain = () => {
       receive: true
     },    //material: materialWHS,
     position: {
-      y: 0
+      x: -80,
+      y: -100,
+      z: -500
     },
     rotation: [0, 0, Math.PI/100],
     //scale: [scaleX,scaleX,scaleZ]
   })
 
   //terrain.receiveShadow = true;
-
-  console.log({terrain})
+  console.log({tree})
   
   //terrain.native.name = "terrain"
 
-  return terrain;
+  return tree;
 };
   
 
-export default Terrain;
+export default Trees;

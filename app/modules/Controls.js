@@ -13,7 +13,7 @@ import TWEEN from '@tweenjs/tween.js';
 // setDamping
 
 class Controls {
-    constructor({scene, camera, mesh, enabled, light, skybox, params = { ypos: 1 , speed: 15 }}) {
+    constructor({scene, camera, mesh, enabled, light, skybox, params = { ypos: 1.5 , speed: 15 }}) {
         this.camera = camera;
         this.mesh = mesh;
         this.params = params;
@@ -21,11 +21,11 @@ class Controls {
         this.skybox = skybox;
         this.light =  light
         this.skis;
-  
         this.velocityFactor = 1;
       
         this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
-        this.camera.position.set(0, 0, 0);
+    // distance from physics sphere
+        this.camera.position.set(0, 10, 40);
       
         /* Init */
         const player = this.mesh;
@@ -44,19 +44,20 @@ class Controls {
         
         this.createSkis();
 
+        this.tRight = new TWEEN.Tween(this.yawObject.rotation)
+        .to({z: -30/70}, 1000 )
+        .onUpdate(() => {})
+        .easing( TWEEN.Easing.Linear.None)
 
-        var position = { x : 0, y: 300 };
-       // var target = { x : 400, y: 50 };
-        const rotation = 0;
-        const target = 0.25;
-        
-        // this.tween = new TWEEN.Tween(rotation).to(target, 1000)
-        // .onUpdate(function() { // Called after tween.js updates 'coords'.
-        // // Move 'box' to the position described by 'coords' with a CSS translation.
-        //    // box.style.setProperty('transform', 'translate(' + coords.x + 'px, ' + coords.y + 'px)');
-        //     this.yawObject.rotation.z = rotation
-        //     console.log({rotation})
-        // })
+        this.tLeft = new TWEEN.Tween(this.yawObject.rotation)
+        .to({z: 30/70}, 1000 )
+        .onUpdate(() => {})
+        .easing( TWEEN.Easing.Linear.None)
+
+        this.tReturn = new TWEEN.Tween(this.yawObject.rotation)
+        .to({z: 0}, 1000 )
+        .onUpdate(() => {})
+        .easing( TWEEN.Easing.Linear.None)
 
         scene.add(this.yawObject);
 
@@ -73,8 +74,8 @@ class Controls {
     }
 
     createSkis() {
-        // skis
-        const skiGeo = new THREE.BoxBufferGeometry(2,0.2,60);
+    // skis
+        const skiGeo = new THREE.BoxBufferGeometry(2,0.2,40);
         const skiMaterial = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide})
 
 
@@ -91,13 +92,11 @@ class Controls {
         this.skis.add(skiL);
         this.skis.add(skiR);
 
-        this.skis.position.y = this.params.ypos -4.5;
+        this.skis.position.y = -5;
+        //this.skis.geometry.translate.z = -30
+        console.log(this.skis)
         //this.skis.rotation.x = -0.2;
         this.yawObject.add(this.skis)
-
-
-        //console.log(thi)
-
     }
 
     enableTracking(isEnabled) {
@@ -119,7 +118,7 @@ class Controls {
         player.on('physics:added', () => {
             player.manager.get('module:world').addEventListener('update', () => {
             if (this.enabled === false) return;
-            this.yawObject.position.copy(player.position);
+            this.yawObject.position.copy({x:player.position.x, y:player.position.y, z:player.position.z});
             this.yawObject.position.y = this.yawObject.position.y + this.params.ypos
             
             });
@@ -147,6 +146,7 @@ class Controls {
         if (this.moveLeft) inputVelocity.x = -speed;
         if (this.moveRight) inputVelocity.x = speed;
 
+
     // Convert velocity to world coordinates
         const euler = new THREE.Euler();
         euler.x = this.pitchObject.rotation.x;
@@ -159,25 +159,29 @@ class Controls {
 
         if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
         const pos = this.yawObject.position.clone();
-        this.camera.native.lookAt(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+        this.camera.native.lookAt(pos.x + vN.x *2, pos.y + vN.y*2, pos.z + vN.y*2)
         this.skis.lookAt(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
 
         
-        this.yawObject.rotation.z = -inputVelocity.x/70
+        //this.yawObject.rotation.z = -inputVelocity.x/70
 
        // if (this.moveRight) this.tween.start();
         //TWEEN.update(delta);
 
-        this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = inputVelocity.x/20;
+        this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
 
-        // move the light and lightshadow with object
-        this.updateLights()
+    // move the light and lightshadow with object
+        this.updateLights();
+
+        TWEEN.update();
+
 
 
         inputVelocity.applyQuaternion(this.quat);
 
         this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: inputVelocity.z});
-
+    
+    // stop things getting sillyfast
         if (this.physics.getLinearVelocity().clone().z < -80) {
             //this.physics.setLinearVelocity({...this.physics.getLinearVelocity(), z: -50})
             this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 10});
@@ -187,18 +191,16 @@ class Controls {
     }
 
     updateLights() {
-        // move the light and lightshadow with object
+    // move the light and lightshadow with object
         this.shadowCamera = this.light.shadow.camera;
         const posn = this.yawObject.position.clone()
         this.light.position.set(posn.x+50, posn.y+50, posn.z - 15)
         this.light.target = this.yawObject
 
-       // const posn = this.yawObject.position.clone()
-        console.log(posn)
         this.skybox.position.z = posn.z -400;
         this.skybox.position.y = posn.y -100;
         this.skybox.position.x = posn.x;
-        console.log(this.skybox)
+       // console.log(this.skybox)
     }
 
 
@@ -229,12 +231,12 @@ class Controls {
             case 87:
                 // w
                 this.moveForward = true;
-                console.log('t',this.moveForward)
                 break;
 
             case 37: // left
             case 65:
                 // a
+                this.tLeft.start();
                 this.moveLeft = true;
                 break;
 
@@ -247,6 +249,7 @@ class Controls {
             case 39: // right
             case 68:
                 // d
+                this.tRight.start();
                 this.moveRight = true;
                 break;
 
@@ -277,6 +280,7 @@ class Controls {
         case 37: // left
         case 65:
             // a
+            this.tReturn.start()
             this.moveLeft = false;
             break;
 
@@ -289,6 +293,7 @@ class Controls {
         case 39: // right
         case 68:
             // d
+            this.tReturn.start()
             this.moveRight = false;
             break;
 
