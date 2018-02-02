@@ -91,8 +91,10 @@ const misc = Misc(app)
 const initWorld = () => {
   terrain.addTo(app)
   .then(() => {
-    fences.map(fence => fence.addTo(app))
-    //fences.native.name = 'fence';
+    fences.map(fence => {
+      fence.addTo(app)
+      fence.native.name = 'fence';
+    })
   })
   .then(() => trees.addTo(app))
   .then(() => {
@@ -109,6 +111,7 @@ const initWorld = () => {
   
     slider.on('collision',  (otherObject, v, r, contactNormal) => {
       console.log(otherObject.name);
+      if (otherObject.name !== 'terrain') collisionStatus = 'hit ' + otherObject.name
       let collided;
       if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
         collided = true;
