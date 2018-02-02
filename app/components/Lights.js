@@ -11,7 +11,7 @@ class Lights {
     const l = 500;
     this.dlight = new WHS.DirectionalLight( {
 
-      color: 0xffffff,
+      color: 0xDDDDff,
       intensity: 1.0,
       distance: 300,
       decay: 0.1,

@@ -6,6 +6,7 @@ import StatsModule from './modules/StatsModule';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
 import Trees from './components/Trees';
+import Fences from './components/Fences';
 
 import Lights from './components/Lights';
 import Slider from './components/Slider';
@@ -73,6 +74,8 @@ const camera = app.manager.get('camera')
 const skybox = new SkyBox(app, scene);
 const slider = Slider();
 const terrain = Terrain();
+const fences = Fences();
+
 const trees = Trees();
 const lights = new Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
@@ -87,6 +90,10 @@ const misc = Misc(app)
 
 const initWorld = () => {
   terrain.addTo(app)
+  .then(() => {
+    fences.map(fence => fence.addTo(app))
+    //fences.native.name = 'fence';
+  })
   .then(() => trees.addTo(app))
   .then(() => {
     trees.native.material.transparent = true;
@@ -130,6 +137,7 @@ if (firstPerson) {
 }
 
 let collidableMeshList = [];
+let collisionStatus = '';
 initWorld();
 
 
@@ -156,6 +164,7 @@ const gameLoop = new WHS.Loop((clock) => {
 const displayStatus = (delta) => {
   speedDisplay.innerHTML = parseInt(controls.displaySpeed());
   timeDisplay.innerHTML = delta.toFixed(2)
+  statusDisplay.innerHTML = collisionStatus;
 
 }
 
@@ -177,7 +186,8 @@ const detectGateCollisions = () => {
 		const ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
 		const collisionResults = ray.intersectObjects( collidableMeshList );
 		if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
-			console.log(" Hit ", collisionResults[0].object.name);
+      console.log(" Hit ", collisionResults[0].object.name);
+      collisionStatus = " Hit " + collisionResults[0].object.name
     }
   })
 }

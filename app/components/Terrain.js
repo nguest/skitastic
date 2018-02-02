@@ -20,7 +20,7 @@ const Terrain = () => {
 
   const terrain = new WHS.Importer({
     loader: new THREE.JSONLoader(),
-    url: './assets/track2.json',
+    url: './assets/track3.json',
     modules: [
       new PHYSICS.ConcaveModule({
         friction: 0.9,
