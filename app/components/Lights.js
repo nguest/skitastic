@@ -23,12 +23,12 @@ class Lights {
       shadow: Object.assign({
         fov: 90,
         camera: {
-          near: 0,
-          far: 500,
-          left: -l,
-          right: l,
-          top: l,
-          bottom: -l,
+          near: 20,
+          far: 100,
+          left: -400,
+          right: 400,
+          top: 400,
+          bottom: -400,
         },
         //radius: 0.1,
         mapSize: {

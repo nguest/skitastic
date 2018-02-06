@@ -18,7 +18,7 @@ const Fences = () => {
 
   const fenceL = new WHS.Importer({
     loader: new THREE.JSONLoader(),
-    url: './assets/fenceL.json',
+    url: './assets/fences.json',
     modules: [
       new PHYSICS.ConcaveModule({
         friction: 0.9,
@@ -37,29 +37,29 @@ const Fences = () => {
     rotation: [0, 0, Math.PI/100],
   })
 
-  const fenceR = new WHS.Importer({
-    loader: new THREE.JSONLoader(),
-    url: './assets/fenceR.json',
-    modules: [
-      new PHYSICS.ConcaveModule({
-        friction: 0.9,
-        mass: 0,
-        restitution: 0.5,
-      }),
-    ],
-    //material,
-    shadow: {
-      cast: true,
-      receive: true
-    },    //material: materialWHS,
-    position: {
-      y: 0
-    },
-    rotation: [0, 0, Math.PI/100],
-  })
+  // const fenceR = new WHS.Importer({
+  //   loader: new THREE.JSONLoader(),
+  //   url: './assets/fenceR.json',
+  //   modules: [
+  //     new PHYSICS.ConcaveModule({
+  //       friction: 0.9,
+  //       mass: 0,
+  //       restitution: 0.5,
+  //     }),
+  //   ],
+  //   //material,
+  //   shadow: {
+  //     cast: true,
+  //     receive: true
+  //   },    //material: materialWHS,
+  //   position: {
+  //     y: 0
+  //   },
+  //   rotation: [0, 0, Math.PI/100],
+  // })
 
   
-  return [fenceL , fenceR];
+  return fenceL;
 };
   
 

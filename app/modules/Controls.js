@@ -13,7 +13,7 @@ import TWEEN from '@tweenjs/tween.js';
 // setDamping
 
 class Controls {
-    constructor({scene, camera, mesh, enabled, light, skybox, params = { ypos: 1.5 , speed: 15 }}) {
+    constructor({scene, camera, mesh, enabled, light, skybox, params = { ypos: 0 , speed: 0.5 /* 15*/ }}) {
         this.camera = camera;
         this.mesh = mesh;
         this.params = params;
@@ -25,20 +25,26 @@ class Controls {
       
         this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
     // distance from physics sphere
-        this.camera.position.set(0, 10, 40);
+        this.camera.position.set(0, 7, 10);
       
         /* Init */
         const player = this.mesh;
         this.physics = player.use('physics');
 
-        this.pitchObject = new THREE.Object3D();
-        this.pitchObject.add(this.camera.native);
+        // for dev so we can see the target
+        this.targetObject = new THREE.Mesh(
+          new THREE.SphereBufferGeometry(1,8,8)
+        );
       
         this.yawObject = new THREE.Object3D();
         scene.add(this.yawObject);
+        this.yawObject.add(this.camera.native);
+
       
        // this.yawObject.position.y = this.params.ypos; // eyes are 2 meters above the ground
-        this.yawObject.add(this.pitchObject);
+        //this.yawObject.add(this.pitchObject);
+        
+        scene.add(this.targetObject)
       
         this.quat = new THREE.Quaternion();
         
@@ -86,13 +92,13 @@ class Controls {
         skiR.castShadow = true;
 
 
-        skiL.position.x = -1.5;
-        skiR.position.x = 1.5;
+        skiL.position.set(-1.5,-4,0);
+        skiR.position.set(1.5,-4,0)
         this.skis = new THREE.Object3D();
         this.skis.add(skiL);
         this.skis.add(skiR);
 
-        this.skis.position.y = -5;
+        ///this.skis.position.y = -4;
         //this.skis.geometry.translate.z = -30
         console.log(this.skis)
         //this.skis.rotation.x = -0.2;
@@ -133,23 +139,31 @@ class Controls {
     update = delta => {
         if (this.enabled === false) return;
 
-        delta = delta || 0.5;
-        delta = Math.min(delta, 0.5, delta);
+        //  NOT SURE
+        // delta = delta || 0.5;
+        // delta = Math.min(delta, 0.5, delta);
 
     // set the speed
         const inputVelocity = new THREE.Vector3();
         inputVelocity.set(0, 0, 0);
         let speed = this.velocityFactor * delta * this.params.speed;
 
-        if (this.moveForward) inputVelocity.z = -speed;
-        if (this.moveBackward) inputVelocity.z = speed;
-        if (this.moveLeft) inputVelocity.x = -speed;
-        if (this.moveRight) inputVelocity.x = speed;
+        //if (this.moveForward) inputVelocity.z = -speed;
+        //if (this.moveBackward) inputVelocity.z = speed;
+        if (this.moveLeft) {
+            inputVelocity.x = -speed;
+            inputVelocity.z = speed * 0.5;
+        }
+        if (this.moveRight) {
+            inputVelocity.x = speed;
+            inputVelocity.z = speed * 0.5;
+
+        }
 
 
     // Convert velocity to world coordinates
         const euler = new THREE.Euler();
-        euler.x = this.pitchObject.rotation.x;
+        euler.x = this.targetObject.rotation.x;
         euler.y = this.yawObject.rotation.y;
         euler.order = 'XYZ';
         this.quat.setFromEuler(euler);
@@ -159,15 +173,18 @@ class Controls {
 
         if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
         const pos = this.yawObject.position.clone();
-        this.camera.native.lookAt(pos.x + vN.x *2, pos.y + vN.y*2, pos.z + vN.y*2)
-        this.skis.lookAt(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+        const lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+        lookAt.min(new THREE.Vector3(0,-10,-1))
+        this.camera.native.lookAt(lookAt)
 
-        
-        //this.yawObject.rotation.z = -inputVelocity.x/70
+        const skiLookAt = lookAt.clone()
+        console.log(skiLookAt.sub(this.targetObject.position))
 
-       // if (this.moveRight) this.tween.start();
-        //TWEEN.update(delta);
-
+        this.targetObject.position.set(lookAt.x,lookAt.y,lookAt.z)
+       // console.log('p',this.targetObject.position)
+       // console.log('y',(this.yawObject.position))
+        //this.skis.lookAt(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+        this.skis.lookAt(skiLookAt)
         this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
 
     // move the light and lightshadow with object
@@ -175,14 +192,12 @@ class Controls {
 
         TWEEN.update();
 
-
-
         inputVelocity.applyQuaternion(this.quat);
 
         this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: inputVelocity.z});
     
     // stop things getting sillyfast
-        if (this.physics.getLinearVelocity().clone().z < -80) {
+        if (this.physics.getLinearVelocity().clone().z < -120) {
             //this.physics.setLinearVelocity({...this.physics.getLinearVelocity(), z: -50})
             this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 10});
         }        
@@ -194,13 +209,12 @@ class Controls {
     // move the light and lightshadow with object
         this.shadowCamera = this.light.shadow.camera;
         const posn = this.yawObject.position.clone()
-        this.light.position.set(posn.x+50, posn.y+50, posn.z - 15)
-        this.light.target = this.yawObject
+        this.light.position.set(posn.x+50, posn.y+50, posn.z - 20)
+        this.light.target = this.yawObject;
 
-        this.skybox.position.z = posn.z -400;
-        this.skybox.position.y = posn.y -100;
+        this.skybox.position.z = posn.z -300;
+        this.skybox.position.y = posn.y -10;
         this.skybox.position.x = posn.x;
-       // console.log(this.skybox)
     }
 
 

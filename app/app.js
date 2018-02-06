@@ -11,6 +11,7 @@ import Fences from './components/Fences';
 import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
+import Finish from './components/Finish';
 
 import Misc from './components/Misc';
 import Controls from './modules/Controls';
@@ -73,9 +74,9 @@ app.modules[3].renderer.shadowMap.enabled = true;
 const camera = app.manager.get('camera')
 const skybox = new SkyBox(app, scene);
 const slider = Slider();
-const terrain = Terrain();
+const [track, terrainOuter] = new Terrain(app);
 const fences = Fences();
-
+const finish = new Finish();
 const trees = Trees();
 const lights = new Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
@@ -89,24 +90,58 @@ const misc = Misc(app)
 //////////////////////////////////////
 
 const initWorld = () => {
-  terrain.addTo(app)
+  finish.addTo(app)
   .then(() => {
-    fences.map(fence => {
-      fence.addTo(app)
-      fence.native.name = 'fence';
-    })
+    return track.addTo(app)
+    return track;
+  })
+  .then((track) => {
+
+    const getTerrainExtents = (lat, track) => {
+      console.log({ya:track})
+      const vertices = track.native.geometry.vertices
+      
+  
+      const getLowest = (lat, vertices) => {
+        return vertices.reduce((acc, curr) => ( 
+          new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, lat)) <
+              new THREE.Vector2(0, acc.z).distanceTo(new THREE.Vector2(0, lat))
+          ? curr 
+          : acc
+        ));
+      }
+      return getLowest(lat, vertices)
+    }
+
+    console.log( getTerrainExtents(2000, track))
+  })
+  .then(() => {
+    //terrain.map(terra => terra.addTo(app))
+    terrainOuter.addTo(app)
+
+  })
+  .then(() => {
+    fences.addTo(app)
+    fences.native.material[0].transparent = true;
+    fences.native.name = 'fence';
+      console.log(fences.native.material)
   })
   .then(() => trees.addTo(app))
   .then(() => {
     trees.native.material.transparent = true;
 
-    terrain.native.name = 'terrain';
-    console.log(terrain.native.material)
-
+    //terrain[0].native.name = 'terrain';
+    console.log({track})    
     console.log({scene})
 
+
+
+
+
+
+
     slider.addTo(app)
-    const gates = Gates(app, terrain.native.geometry.vertices);
+    const gates = Gates(app, track.native.geometry.vertices);
     //slider.addTo(app);
   
     slider.on('collision',  (otherObject, v, r, contactNormal) => {
@@ -155,8 +190,6 @@ const gameLoop = new WHS.Loop((clock) => {
   const delta = clock.getElapsedTime();
 
   if (firstPerson) controls.update(delta);
-
-  //camera.native.lookAt(new THREE.Vector3(0, -2000, -20000));
 
   displayStatus(delta);
 
@@ -211,9 +244,9 @@ document.getElementById('reset').addEventListener('click',()=>{
   gameLoop.start(app)
 })
 document.getElementById('camera').addEventListener('click',()=>{
-  firstPerson = !firstPerson;
+  ///firstPerson = !firstPerson;
   console.log(app, firstPerson, app.camera)
-
+  slider.position.set(-400,-6000,-20000)
   app.start();
 })
 document.addEventListener('keydown', (e) => {

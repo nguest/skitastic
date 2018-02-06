@@ -86,6 +86,7 @@ class Gate {
       //color: 0xffaabb,
       map: new THREE.TextureLoader().load('./assets/textures/flag.png'),
       transparent: true,
+      shininess: 100,
       //emissive: 0x222222,
       specular: 0x666666,
     })
@@ -117,7 +118,7 @@ class Gate {
       geometry,
       position: [
         this.position.x - (this.width + this.params.poleWidth)/2,
-        this.position.y + 20,
+        this.position.y + 15,
         this.position.z
       ],
       rotation,
@@ -137,6 +138,7 @@ class Gate {
       material: poleMaterial,
       shadow,
     });
+    poleL.native.name = poleR.native.name = 'pole';
     poleL.addTo(app);
     poleR.addTo(app);
   }

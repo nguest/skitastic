@@ -32,7 +32,7 @@ const Slider = () => {
     position: new THREE.Vector3(0, 2, 0)
   })
   //if (!isDev) 
-  slider.native.visible = false;
+  slider.native.visible = true;
   console.log({slider})
   return slider;
 };
