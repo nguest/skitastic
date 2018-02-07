@@ -5,7 +5,7 @@ import * as PHYSICS from './modules/physics-module-2';
 import StatsModule from './modules/StatsModule';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
-import Trees from './components/Trees';
+import Tree from './components/Trees';
 import Fences from './components/Fences';
 
 import Lights from './components/Lights';
@@ -77,7 +77,7 @@ const slider = Slider();
 const [track, terrainOuter] = new Terrain(app);
 const fences = Fences();
 const finish = new Finish();
-const trees = Trees();
+//const trees = Trees();
 const lights = new Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
 console.log(lights.getShadowCamera())
@@ -98,7 +98,7 @@ const initWorld = () => {
   .then((track) => {
 
     const getTerrainExtents = (lat, track) => {
-      console.log({ya:track})
+      //console.log({ya:track})
       const vertices = track.native.geometry.vertices
       
   
@@ -113,12 +113,33 @@ const initWorld = () => {
       return getLowest(lat, vertices)
     }
 
-    console.log( getTerrainExtents(2000, track))
+    console.log(getTerrainExtents(2000, track))
   })
   .then(() => {
-    //terrain.map(terra => terra.addTo(app))
-    terrainOuter.addTo(app)
+    return Tree().addTo(app)
+   // return scene.add(Tree)
 
+  })
+  .then((tree) => {
+    terrainOuter.addTo(app);
+
+    const treeLocations = terrainOuter.native.geometry.vertices;
+    console.log({tree: tree.native})
+    //tree.native.children[3].material.premultipliedAlpha = true;
+    tree.native.children[3].material.transparent = true;
+    // tree.native.children.map(child => {
+    //   const material = child.material.clone();
+    //   material.transparent = true;
+    //   child.material = material;
+    // })
+
+    //tree.native.children[3].material.depthTest = false // stops png clipping
+    treeLocations.map(posn => {
+      const newTree = tree.native.clone();
+      newTree.position.set(posn.x,posn.y,posn.z);
+      //newTree.addTo(app);
+      //scene.add(newTree)
+    })
   })
   .then(() => {
     fences.addTo(app)
@@ -126,9 +147,8 @@ const initWorld = () => {
     fences.native.name = 'fence';
       console.log(fences.native.material)
   })
-  .then(() => trees.addTo(app))
-  .then(() => {
-    trees.native.material.transparent = true;
+   .then(() => {
+    //trees.native.material.transparent = true;
 
     //terrain[0].native.name = 'terrain';
     console.log({track})    

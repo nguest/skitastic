@@ -29,7 +29,7 @@ class Gate {
     this.width = w;
     this.idx = idx;
 
-    console.log({ app, position, w })
+    //console.log({ app, position, w })
 
     this.params = {
       gateHeight: 60,
