@@ -16,6 +16,8 @@ import Finish from './components/Finish';
 import Misc from './components/Misc';
 import Controls from './modules/Controls';
 
+import DecalGeometry from './modules/DecalGeometry';
+
 
 //////////////////////////////////////
 // Setup app and three scene                  
@@ -52,10 +54,11 @@ app.setScene(scene);
 app
   .module(
     new WHS.RenderingModule({ 
-    ...APPCONFIG.appDefaults.rendering, 
-    shadow: true,
-    shadowMap: { enabled: true},
-    bgColor: 0xaaddff,
+      ...APPCONFIG.appDefaults.rendering, 
+      shadow: true,
+      shadowMap: { enabled: true},
+      bgColor: 0xaaddff,
+      localClippingEnabled: true,
     }),
   )
   .module(worldModule)
@@ -65,6 +68,15 @@ app
 
 // renderer shadow hack
 app.modules[3].renderer.shadowMap.enabled = true;
+
+// clipping planes
+const clippingPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), 5000 );
+
+app.modules[3].renderer.localClippingEnabled = true,
+app.modules[3].renderer.clippingPlanes = [clippingPlane]
+
+
+console.log({app})
 
 //////////////////////////////////////
 // Get the objects                   
@@ -92,10 +104,12 @@ const misc = Misc(app)
 const initWorld = () => {
   finish.addTo(app)
   .then(() => {
+    
     return track.addTo(app)
-    return track;
   })
   .then((track) => {
+
+    //track.native.material[0].clippingPlanes = [ clippingPlane ]
 
     const getTerrainExtents = (lat, track) => {
       //console.log({ya:track})
@@ -112,8 +126,16 @@ const initWorld = () => {
       }
       return getLowest(lat, vertices)
     }
-
     console.log(getTerrainExtents(2000, track))
+    console.log({track})
+
+   console.log({THREE})
+
+    var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(1, 2, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
+    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    var mesh = new THREE.Mesh( geometry, material );
+    scene.add( mesh );
+
   })
   .then(() => {
     return Tree().addTo(app)
@@ -190,7 +212,8 @@ if (firstPerson) {
     mesh: slider, 
     skybox: skybox.getCube(),
     enabled: false,
-    light: lights.getDLight()
+    light: lights.getDLight(),
+    clippingPlane,
   });
 }
 

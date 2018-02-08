@@ -29,7 +29,7 @@ const Slider = () => {
         receive: true,
     },        
 
-    position: new THREE.Vector3(0, 2, 0)
+    position: new THREE.Vector3(0, -15, 0)
   })
   //if (!isDev) 
   slider.native.visible = true;

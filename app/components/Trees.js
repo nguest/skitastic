@@ -54,7 +54,7 @@ const Tree = (posn) => {
       });
     },
   
-    position: [0, -10, 0],
+    position: [0, 50, 0],
     rotation: new THREE.Euler(0, Math.PI / 2 * 3, 0)
   })
 
