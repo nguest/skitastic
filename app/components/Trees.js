@@ -7,7 +7,7 @@ import DecalGeometry from '../modules/DecalGeometry';
 
 export class Tree {
   constructor(posn) {
-    const dim = { x: 80, y: 150 };
+    const dim = { x: 120, y: 225 };
 
     const tree = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(80,150,1,1),
@@ -50,7 +50,7 @@ class Trees {
 
       if (intersects.length) {
         const xyzTreeLocation = intersects[0].point;
-        xyzTreeLocation.y = xyzTreeLocation.y -20;
+        xyzTreeLocation.y = xyzTreeLocation.y -80;
 
         const tree = new Tree(xyzTreeLocation)
         this.scene.add(tree);

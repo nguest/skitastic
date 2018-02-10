@@ -24,7 +24,7 @@ class Controls {
 		skybox, 
 		clippingPlane,
 		//track,
-		params = { ypos: 0 , speed: 50 /*0.5*/ },
+		params = { ypos: 0 , speed: 100 /*0.5*/ },
 	}) {
 		this.camera = camera;
 		this.mesh = mesh;
@@ -178,6 +178,9 @@ class Controls {
 
 		this.skis.lookAt(skiLookAt)
 		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
+		 if (this.moveLeft) {
+		//	this.skis.children[0].position.y = 3;
+		 }
 
 	// move the light and lightshadow with object
 		this.updateLights();

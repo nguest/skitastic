@@ -6,15 +6,18 @@ const Skis = (track) => {
   const skiMaterial = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide})
 
   const skis = new THREE.Object3D();
-  skis.lookAt(new THREE.Vector3(0,-0.4,-1))
+  //skis.lookAt(new THREE.Vector3(0,-0.4,-1))
 
-  const ski =  new THREE.JSONLoader().load('./assets/ski.json', ski => {
-    ski.rotateX(Math.PI).rotateY(Math.PI/2);
+  const ski =  new THREE.JSONLoader().load('./assets/ski.json', (ski, materials) => {
+    console.log({ski, materials})
+    //ski.computeVertexNormals()
+   // ski.computeFaceNormals()
+    //ski.rotateX(Math.PI).rotateY(Math.PI/2);
     const material = new THREE.MeshPhongMaterial({color:0xaaff00})
-    const skiMeshL = new THREE.Mesh(ski,material)
-    const skiMeshR = new THREE.Mesh(ski,material)
-    skiMeshL.position.set(-1.5, -4.5, -20);
-    skiMeshR.position.set(1.5, -4.5, -20);
+    const skiMeshL = new THREE.Mesh(ski,materials[0])
+    const skiMeshR = new THREE.Mesh(ski,materials[0])
+    skiMeshL.position.set(-1.5, -4.8, -20);
+    skiMeshR.position.set(1.5, -4.8, -20);
     skiMeshL.castShadow = skiMeshR.castShadow = true;
 
     skis.add(skiMeshL)
