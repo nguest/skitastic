@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import APPCONFIG from './AppConfig';
+import APPCONFIG, { isDev } from './AppConfig';
 import * as WHS from 'whs';
 import * as PHYSICS from './modules/physics-module-2';
 import StatsModule from './modules/StatsModule';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
-import Tree from './components/Trees';
+import Trees, { Tree } from './components/Trees';
 import Fences from './components/Fences';
 
 import Lights from './components/Lights';
@@ -22,6 +22,10 @@ import DecalGeometry from './modules/DecalGeometry';
 //////////////////////////////////////
 // Setup app and three scene                  
 //////////////////////////////////////
+
+const gameState = {
+
+}
 
 const scene = new THREE.Scene();
 
@@ -63,20 +67,23 @@ app
   )
   .module(worldModule)
   .module(new WHS.OrbitControlsModule())
-  .module(new WHS.ResizeModule())
-  .module(new StatsModule())
+  .module(new WHS.ResizeModule());
+if (isDev) app.module(new StatsModule());
 
 // renderer shadow hack
 app.modules[3].renderer.shadowMap.enabled = true;
 
 // clipping planes
-const clippingPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), 5000 );
+const clippingPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), APPCONFIG.clipDistance );
 
 app.modules[3].renderer.localClippingEnabled = true,
 app.modules[3].renderer.clippingPlanes = [clippingPlane]
-
-
 console.log({app})
+
+
+let controls;
+let collidableMeshList = [];
+let collisionStatus = '';
 
 //////////////////////////////////////
 // Get the objects                   
@@ -86,36 +93,27 @@ console.log({app})
 const camera = app.manager.get('camera')
 const skybox = new SkyBox(app, scene);
 const slider = Slider();
-const [track, terrainOuter] = new Terrain(app);
+const [track, terrainOuter, centerLine] = new Terrain(app);
 const fences = Fences();
 const finish = new Finish();
-//const trees = Trees();
 const lights = new Lights(app, scene);
 const timeDisplay = document.querySelector('#timeDisplay');
-console.log(lights.getShadowCamera())
-
-const misc = Misc(app)
-
 
 //////////////////////////////////////
 // Add the objects                   
 //////////////////////////////////////
 
-const initWorld = () => {
+const initWorld = (controls) => {
   finish.addTo(app)
-  .then(() => {
-    
-    return track.addTo(app)
-  })
+  //.then(() => centerLine.addTo(app))
+  .then(() => terrainOuter.addTo(app))
+  .then(() => fences.addTo(app))
+  .then(() => slider.addTo(app))
+  .then(() => track.addTo(app))
   .then((track) => {
-
-    //track.native.material[0].clippingPlanes = [ clippingPlane ]
-
+    track.native.name = 'track';
     const getTerrainExtents = (lat, track) => {
-      //console.log({ya:track})
-      const vertices = track.native.geometry.vertices
-      
-  
+      const vertices = track.geometry.vertices;
       const getLowest = (lat, vertices) => {
         return vertices.reduce((acc, curr) => ( 
           new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, lat)) <
@@ -126,75 +124,47 @@ const initWorld = () => {
       }
       return getLowest(lat, vertices)
     }
-    console.log(getTerrainExtents(2000, track))
-    console.log({track})
+    console.log(getTerrainExtents(2000, track.native))
 
-   console.log({THREE})
-
-    var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(1, 2, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
+    var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(0, 1, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
     var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     var mesh = new THREE.Mesh( geometry, material );
-    scene.add( mesh );
+   // scene.add( mesh );
 
-  })
-  .then(() => {
-    return Tree().addTo(app)
-   // return scene.add(Tree)
+    const trees = new Trees(scene, terrainOuter.native);
 
-  })
-  .then((tree) => {
-    terrainOuter.addTo(app);
-
-    const treeLocations = terrainOuter.native.geometry.vertices;
-    console.log({tree: tree.native})
-    //tree.native.children[3].material.premultipliedAlpha = true;
-    tree.native.children[3].material.transparent = true;
-    // tree.native.children.map(child => {
-    //   const material = child.material.clone();
-    //   material.transparent = true;
-    //   child.material = material;
-    // })
-
-    //tree.native.children[3].material.depthTest = false // stops png clipping
-    treeLocations.map(posn => {
-      const newTree = tree.native.clone();
-      newTree.position.set(posn.x,posn.y,posn.z);
-      //newTree.addTo(app);
-      //scene.add(newTree)
-    })
-  })
-  .then(() => {
-    fences.addTo(app)
     fences.native.material[0].transparent = true;
     fences.native.name = 'fence';
-      console.log(fences.native.material)
-  })
-   .then(() => {
-    //trees.native.material.transparent = true;
 
-    //terrain[0].native.name = 'terrain';
+    const vs = centerLine;
+    const lineV = vs.filter(v => (v.y < 100))
+    const lineGeo = new THREE.Geometry();
+    lineGeo.vertices = vs;
+    const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x0000ff,linewidth: 20, }));
+    if (isDev) scene.add(line);
+  })
+  .then(() => {
+
     console.log({track})    
     console.log({scene})
 
 
-
-
-
-
-
-    slider.addTo(app)
     const gates = Gates(app, track.native.geometry.vertices);
-    //slider.addTo(app);
   
     slider.on('collision',  (otherObject, v, r, contactNormal) => {
       console.log(otherObject.name);
-      if (otherObject.name !== 'terrain') collisionStatus = 'hit ' + otherObject.name
+      if (otherObject.name !== 'track') collisionStatus = 'hit ' + otherObject.name
       let collided;
       if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
         collided = true;
         //console.log('collision!',otherObject)
       }
     });
+    
+    console.log({controls})
+
+   // controls.track = track;
+
   
     collidableMeshList = gates.map(gate => gate.getPortalObject())
   
@@ -203,24 +173,20 @@ const initWorld = () => {
   });
 }
 
+initWorld(controls);
 app.camera = camera;
-let controls;
 if (firstPerson) {
   controls = new Controls({
     scene, 
     camera: app.camera, 
-    mesh: slider, 
+    mesh: slider,
+    //track,
     skybox: skybox.getCube(),
     enabled: false,
     light: lights.getDLight(),
     clippingPlane,
   });
 }
-
-let collidableMeshList = [];
-let collisionStatus = '';
-initWorld();
-
 
 
 //////////////////////////////////////
@@ -279,28 +245,28 @@ const detectGateCollisions = () => {
 // Event Listeners                
 //////////////////////////////////////
 
-document.getElementById('reset').addEventListener('click',()=>{
-  worldModule.simulateLoop.stop()
-  gameLoop.stop(app)
-  slider.position.set(-1, 0, 0);
-  worldModule.simulateLoop.start()
-  gameLoop.start(app)
-})
-document.getElementById('camera').addEventListener('click',()=>{
-  ///firstPerson = !firstPerson;
-  console.log(app, firstPerson, app.camera)
-  slider.position.set(-400,-6000,-20000)
-  app.start();
-})
+// document.getElementById('reset').addEventListener('click',()=>{
+//   worldModule.simulateLoop.stop()
+//   gameLoop.stop(app)
+//   slider.position.set(-1, 0, 0);
+//   worldModule.simulateLoop.start()
+//   gameLoop.start(app)
+// })
+// document.getElementById('camera').addEventListener('click',()=>{
+//   ///firstPerson = !firstPerson;
+//   console.log(app, firstPerson, app.camera)
+//   slider.position.set(-400,-6000,-20000)
+//   app.start();
+// })
 document.addEventListener('keydown', (e) => {
   if (e.keyCode === 32) {
 
     if (gameInProgress) {
-      worldModule.simulateLoop.stop()
-      gameLoop.stop(app)
+      worldModule.simulateLoop.stop();
+      gameLoop.stop(app);
     } else {
-      if (firstPerson) controls.enableTracking(true)
-      worldModule.simulateLoop.start()
+      if (firstPerson) controls.enableTracking(true);
+      worldModule.simulateLoop.start();
       gameLoop.start(app);
     }
     gameInProgress = !gameInProgress;

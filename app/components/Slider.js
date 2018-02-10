@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
-import isDev from '../AppConfig';
+import APPCONFIG, { isDev } from '../AppConfig';
 
 const Slider = () => {
   const slider = new WHS.Sphere({ // Create sphere comonent.
@@ -29,10 +29,9 @@ const Slider = () => {
         receive: true,
     },        
 
-    position: new THREE.Vector3(0, -15, 0)
+    position: APPCONFIG.startPosition
   })
-  //if (!isDev) 
-  slider.native.visible = true;
+  if (!isDev) slider.native.visible = false;
   console.log({slider})
   return slider;
 };

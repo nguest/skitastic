@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import TWEEN from '@tweenjs/tween.js';
+import APPCONFIG, { isDev } from '../AppConfig';
+import Skis from '../components/Skis';
 
 // e.g. physics.applyCentralImpulse(v)
 // applyImpulse
@@ -21,15 +23,17 @@ class Controls {
 		light, 
 		skybox, 
 		clippingPlane,
-		params = { ypos: 0 , speed: 35 /*0.5*/ },
+		//track,
+		params = { ypos: 0 , speed: 50 /*0.5*/ },
 	}) {
 		this.camera = camera;
 		this.mesh = mesh;
 		this.params = params;
 		this.enabled = enabled;
 		this.skybox = skybox;
-		this.light =  light
+		this.light = light;
 		this.skis;
+		//this.track = track;
 		this.velocityFactor = 1;
 		this.clippingPlane = clippingPlane;
 
@@ -41,7 +45,7 @@ class Controls {
 		
 		/* Init */
 		const player = this.mesh;
-		player.position.set(0,-30,0)
+		player.position = APPCONFIG.startPosition;
 		this.physics = player.use('physics');
 
 		// for dev so we can see the target
@@ -50,16 +54,12 @@ class Controls {
 		);
 		
 		this.yawObject = new THREE.Object3D();
-		this.yawObject.position.set(0,-30,0)
+		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
 		scene.add(this.yawObject);
-
-		const yawHelper = new THREE.BoxHelper( this.yawObject, 0xff0000 )
-		scene.add(yawHelper);
 		
 		// this.yawObject.position.y = this.params.ypos; // eyes are 2 meters above the ground
-		
-		scene.add(this.targetObject)
+		if (isDev) scene.add(this.targetObject)
 		
 		this.quat = new THREE.Quaternion();
 		
@@ -96,24 +96,7 @@ class Controls {
 
   createSkis() {
 	// skis
-		const skiGeo = new THREE.BoxBufferGeometry(2,0.2,40);
-		const skiMaterial = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide})
-
-		this.skis = new THREE.Object3D();
-		this.skis.lookAt(new THREE.Vector3(0,-0.3,-1))
-
-		const ski =  new THREE.JSONLoader().load('./assets/ski.json', ski => {
-			ski.rotateX(Math.PI).rotateY(Math.PI/2);
-			const material = new THREE.MeshPhongMaterial({color:0xaaff00})
-			const skiMeshL = new THREE.Mesh(ski,material)
-			const skiMeshR = new THREE.Mesh(ski,material)
-			skiMeshL.position.set(-1.5, -4.5, -20);
-			skiMeshR.position.set(1.5, -4.5, -20);
-			skiMeshL.castShadow = skiMeshR.castShadow = true;
-
-			this.skis.add(skiMeshL)
-			this.skis.add(skiMeshR)
-		});
+		this.skis = Skis();
 		this.yawObject.add(this.skis);
 	}
  
@@ -152,7 +135,6 @@ class Controls {
 		if (this.enabled === false) {
 			return;
 		}
-
 		//  NOT SURE
 		delta = delta || 0.5;
 		delta = Math.min(delta, 0.1, delta);
@@ -181,7 +163,7 @@ class Controls {
 		this.quat.setFromEuler(euler);
 
 		const vN = this.physics.getLinearVelocity().clone();
-		vN.normalize()
+		vN.normalize();
 
 		if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
 		const pos = this.yawObject.position.clone();
@@ -202,7 +184,7 @@ class Controls {
 	// make sure TWEEN gets updates
 		TWEEN.update();
 	// update clipping
-		this.clippingPlane.constant = - this.yawObject.position.z + 5000;
+		this.clippingPlane.constant = - this.yawObject.position.z + APPCONFIG.clipDistance;
 
 		inputVelocity.applyQuaternion(this.quat);
 
@@ -221,7 +203,10 @@ class Controls {
 	// move the light and lightshadow with object
 		this.shadowCamera = this.light.shadow.camera;
 		const posn = this.yawObject.position.clone();
-		this.light.position.set(posn.x+50, posn.y+50, posn.z - 20)
+		this.light.position.set(
+			posn.x + APPCONFIG.lightPosition.x, 
+			posn.y + APPCONFIG.lightPosition.y, 
+			posn.z + APPCONFIG.lightPosition.z)
 		this.light.target = this.yawObject;
 
 		this.skybox.position.z = posn.z -300;
@@ -244,10 +229,8 @@ class Controls {
 	
 		//this.yawObject.rotation.y -= movementX * 0.001;
 	   // this.pitchObject.rotation.x -= movementY * 0.001;
-		}
+	}
 
-
-	
 	onKeyDown = (event) => {
 		//console.log(event.keyCode)
 		switch (event.keyCode) {
@@ -260,6 +243,7 @@ class Controls {
 			case 37: // left
 			case 65:
 				// a
+				this.tReturn.stop();
 				this.tLeft.start();
 				this.moveLeft = true;
 				break;
@@ -273,6 +257,7 @@ class Controls {
 			case 39: // right
 			case 68:
 				// d
+				this.tReturn.stop();
 				this.tRight.start();
 				this.moveRight = true;
 				break;
@@ -304,6 +289,8 @@ class Controls {
 		case 37: // left
 		case 65:
 			// a
+			this.tRight.stop()
+			this.tLeft.stop() 
 			this.tReturn.start();
 			this.moveLeft = false;
 			break;
@@ -317,6 +304,10 @@ class Controls {
 		case 39: // right
 		case 68:
 			// d
+			this.tRight.stop()
+			this.tLeft.stop()
+
+
 			this.tReturn.start();
 			this.moveRight = false;
 			break;

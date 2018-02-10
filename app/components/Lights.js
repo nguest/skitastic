@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
-import isDev from '../AppConfig';
-
-//const Lights = (app, scene) => {
+import APPCONFIG, { isDev } from '../AppConfig';
 
 class Lights {
   constructor(app,scene) {
@@ -18,7 +16,7 @@ class Lights {
 
       castShadow: true,
 
-      position: [20,20,0],
+      position: APPCONFIG.lightPosition,//[10,100,10],
 
       shadow: Object.assign({
         fov: 90,
@@ -40,7 +38,7 @@ class Lights {
     })
     this.dlight.addTo(app);
 
-    //this.dlight.
+    console.log({isDev})
     const helper = new THREE.DirectionalLightHelper(this.dlight.native)
     if (isDev) scene.add(helper)
     const helper2 = new THREE.CameraHelper(this.dlight.native.shadow.camera)

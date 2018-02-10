@@ -65,10 +65,7 @@ class Gate {
       material: portalMaterial,
 
       position: this.position,
-  
-      // rotation: {
-      //   x: -Math.PI / 2
-      // }
+
     })
 
     this.portal.native.name = 'gate-' + this.idx
@@ -118,8 +115,8 @@ class Gate {
       geometry,
       position: [
         this.position.x - (this.width + this.params.poleWidth)/2,
-        this.position.y + 15,
-        this.position.z
+        this.position.y + 25,
+        this.position.z + 20,
       ],
       rotation,
       modules,
@@ -131,8 +128,8 @@ class Gate {
       rotation,
       position: [
         this.position.x + (this.width + this.params.poleWidth)/2,
-        this.position.y + 20,
-        this.position.z
+        this.position.y + 25,
+        this.position.z + 20,
       ],
       modules,
       material: poleMaterial,
