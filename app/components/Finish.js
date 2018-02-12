@@ -5,7 +5,7 @@ import * as PHYSICS from '../modules/physics-module';
 class Finish {
 
   constructor(app) {
-    this.finish = new WHS.Importer({
+    const finish = new WHS.Importer({
       loader: new THREE.JSONLoader(),
       url: './assets/finish.json',
       modules: [
@@ -21,18 +21,10 @@ class Finish {
       },
       
     
-      rotation: [0, 0, Math.PI/100],
-    })
-
-  //terrain.receiveShadow = true;
-
-    console.log({terrain:this.terrain})
+      rotation: [0, 0, 0],
+    }).addTo(app)
   
-    return this.finish;
-  }
-
-  getTerrain() {
-    return this.finish;
+    //return this.finish;
   }
 
 };

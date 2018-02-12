@@ -23,7 +23,7 @@ class Controls {
 		light, 
 		skybox, 
 		clippingPlane,
-		//track,
+		track,
 		params = { ypos: 0 , speed: 100 /*0.5*/ },
 	}) {
 		this.camera = camera;
@@ -33,13 +33,15 @@ class Controls {
 		this.skybox = skybox;
 		this.light = light;
 		this.skis;
-		//this.track = track;
+		this.track = track;
 		this.velocityFactor = 1;
 		this.clippingPlane = clippingPlane;
+		this.scene = scene;
 
+		console.log({a:scene})
 
 		
-		this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
+		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
 		this.camera.position.set(0, 7, 18 );
 		
@@ -56,10 +58,10 @@ class Controls {
 		this.yawObject = new THREE.Object3D();
 		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
-		scene.add(this.yawObject);
+		this.scene.add(this.yawObject);
 		
 		// this.yawObject.position.y = this.params.ypos; // eyes are 2 meters above the ground
-		if (isDev) scene.add(this.targetObject)
+		if (isDev) this.scene.add(this.targetObject)
 		
 		this.quat = new THREE.Quaternion();
 		
@@ -80,7 +82,7 @@ class Controls {
 		.onUpdate(() => {})
 		.easing( TWEEN.Easing.Linear.None)
 
-		scene.add(this.yawObject);
+		this.scene.add(this.yawObject);
 
 		let canJump = false;
 		
@@ -96,7 +98,7 @@ class Controls {
 
   createSkis() {
 	// skis
-		this.skis = Skis();
+		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
 	}
  
@@ -116,14 +118,15 @@ class Controls {
 			}
 		});
   
-		player.on('physics:added', () => {
+		///player.on('physics:added', () => {
 			player.manager.get('module:world').addEventListener('update', () => {
 			if (this.enabled === false) return;
+				console.log('yeh')
 			this.yawObject.position.copy({x:player.position.x, y:player.position.y, z:player.position.z});
 			this.yawObject.position.y = this.yawObject.position.y + this.params.ypos
 			
 			});
-		});
+		//});
 	}
 
 	getDirection(targetVec) {
@@ -133,7 +136,7 @@ class Controls {
 
 	update = delta => {
 		if (this.enabled === false) {
-			return;
+			//return;
 		}
 		//  NOT SURE
 		delta = delta || 0.5;
@@ -165,7 +168,7 @@ class Controls {
 		const vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
 
-		if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
+		//if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
 		const pos = this.yawObject.position.clone();
 		const lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
 		lookAt.min(new THREE.Vector3(1000,-30,-200))

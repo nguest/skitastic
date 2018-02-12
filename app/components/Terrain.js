@@ -11,7 +11,7 @@ class Terrain {
       url: './assets/track4.json',
       modules: [
         new PHYSICS.ConcaveModule({
-          friction: 0.9,
+          friction: 0.3,
           mass: 0,
           restitution: 0.5,
         }),
@@ -22,7 +22,7 @@ class Terrain {
       position: {
         y: 0
       },
-    })
+    }).addTo(app)
 
     const terrainOuter = new WHS.Importer({
       loader: new THREE.JSONLoader(),
@@ -33,7 +33,8 @@ class Terrain {
       position: {
         y: 0
       },
-    })
+    }).addTo(app)
+
   
     return [track, terrainOuter, centerLine];
   }

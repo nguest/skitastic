@@ -6,7 +6,7 @@ const isMobile = (function() {
   return check;
 })();
 
-export const isDev = false;
+export const isDev = true;
 //export isDev;
 
 const APPCONFIG = {

@@ -3,7 +3,7 @@ import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 import { MeshPhongMaterial } from 'three';
 
-const Fences = () => {
+const Fences = (app) => {
   
   const fenceL = new WHS.Importer({
     loader: new THREE.JSONLoader(),
@@ -22,7 +22,7 @@ const Fences = () => {
     position: {
       y: 0
     },
-  })
+  }).addTo(app);
 
   
   return fenceL;
