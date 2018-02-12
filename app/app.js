@@ -36,6 +36,10 @@ class App {
     this.gameInProgress = gameInProgress;
     let firstPerson = true;
     this.speedDisplay =  document.querySelector('#speedDisplay');
+    this.timeDisplay =  document.querySelector('#timeDisplay');
+    this.statusDisplay =  document.querySelector('#statusDisplay');
+    //this.gameLoop() = this.gameLoop.bind(this)
+
 
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
@@ -109,28 +113,32 @@ class App {
   //////////////////////////////////////
 
   initWorld = (gameInProgress, firstPerson) => {
-    const { app, collisionStatus, collidableMeshList, camera, finish, fences, terrainOuter, centerLine, track, slider, scene, skybox, lights, clippingPlane } = this;
+    const { 
+      app, 
+      collisionStatus, 
+      collidableMeshList, 
+      camera, 
+      finish, 
+      fences, 
+      terrainOuter, 
+      centerLine, 
+      track, 
+      slider, 
+      scene, 
+      skybox, 
+      lights, 
+      clippingPlane,
+    } = this;
     Promise.all([finish, fences, terrainOuter, centerLine, track, slider])
     .then(([finish, fences, terrainOuter, centerLine, track, slider ])=>{
       track.native.name = 'track';
-      const getTerrainExtents = (lat, track) => {
-        const vertices = track.geometry.vertices;
-        const getLowest = (lat, vertices) => {
-          return vertices.reduce((acc, curr) => ( 
-            new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, lat)) <
-                new THREE.Vector2(0, acc.z).distanceTo(new THREE.Vector2(0, lat))
-            ? curr 
-            : acc
-          ));
-        }
-        return getLowest(lat, vertices)
-      }
-      console.log(getTerrainExtents(2000, track.native))
+      
 
-      var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(0, 1, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
-      var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      var mesh = new THREE.Mesh( geometry, material );
-    // scene.add( mesh );
+    //   var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(0, 1, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
+    //   var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+    //   var mesh = new THREE.Mesh( geometry, material );
+    // // scene.add( mesh );
+      if (!isDev) slider.native.visible = false;
 
       const trees = new Trees(scene, terrainOuter.native);
 
@@ -144,14 +152,11 @@ class App {
       const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x0000ff,linewidth: 20, }));
       if (isDev) scene.add(line);
 
-      console.log({sl:slider})
-
-
       const gates = Gates(app, track.native.geometry.vertices);
     
       slider.on('collision',  (otherObject, v, r, contactNormal) => {
         console.log(otherObject.name);
-        if (otherObject.name !== 'track') this.collisionStatus = 'hit ' + otherObject.name
+        if (otherObject.name !== 'track') this.collisionStatus = 'hit ' + otherObject.name;
         let collided;
         if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
           collided = true;
@@ -159,9 +164,8 @@ class App {
         }
       });
 
-      
-
       this.collidableMeshList = gates.map(gate => gate.getPortalObject())
+
       if (firstPerson) {
         this.controls = new Controls({
           scene, 
@@ -175,14 +179,22 @@ class App {
         });
       }
 
-    })
-    .then(() => {
+      this.gameLoop = new WHS.Loop((clock) => {
+
+        const delta = clock.getElapsedTime();
+    
+        //if (this.firstPerson) 
+        this.controls.update(delta);
+    
+        this.displayStatus(delta);
+    
+        this.detectGateCollisions(slider);
+        
+      })
 
       this.addEventListeners(gameInProgress, firstPerson)
-
       app.start();
       this.worldModule.simulateLoop.stop();
-      //this.gameLoop;//.execute(app);
     })
   }
 
@@ -193,44 +205,23 @@ class App {
   // Loop and start              
   //////////////////////////////////////
 
-  // get gameInProgress() {
-  //   return false
-  // }
-
-  // set gameInProgress() {
-  //   return false
-  // }
-
-
-  gameLoop = new WHS.Loop((clock) => {
-
-    const delta = clock.getElapsedTime();
-
-    //if (this.firstPerson) 
-    this.controls.update(delta);
-
-    this.displayStatus(delta);
-
-   //this.detectGateCollisions();
-    
-  })
+  
 
   displayStatus = (delta) => {
     this.speedDisplay.innerHTML = parseInt(this.controls.displaySpeed());
-    //timeDisplay.innerHTML = delta.toFixed(2)
-   // statusDisplay.innerHTML = this.collisionStatus;
+    this.timeDisplay.innerHTML = delta.toFixed(2)
+    this.statusDisplay.innerHTML = this.collisionStatus || '';
 
   }
 
-  detectGateCollisions = () => {
+  detectGateCollisions = (slider) => {
   // collision detection:
     //   determines if any of the rays from the cube's origin to each vertex
     //		intersects any face of a mesh in the array of target meshes
     //   for increased collision accuracy, add more vertices to the cube;
     //		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
     //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
-    const sliderMesh = this.slider.native;
-    console.log({t: this.slider.native})
+    const sliderMesh = slider.native;
     const originPoint = sliderMesh.position.clone();
     
     sliderMesh.geometry.vertices.map(vertex => {
@@ -242,12 +233,23 @@ class App {
       const collisionResults = ray.intersectObjects( this.collidableMeshList );
       if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
         console.log(" Hit ", collisionResults[0].object.name);
-        collisionStatus = " Hit " + collisionResults[0].object.name
+        this.collisionStatus = " Hit " + collisionResults[0].object.name
       }
     })
   }
 
+  startGame = () => {
+    if (firstPerson) controls.enableTracking(true);
+    worldModule.simulateLoop.start();
+    gameLoop.start(app);
+  }
 
+  stopGame = () => {
+    const { app, worldModule, gameLoop, controls } = this;
+    if (firstPerson) controls.enableTracking(false);
+    worldModule.simulateLoop.stop();
+    gameLoop.stop(app);
+  }
 
 
 
@@ -279,20 +281,29 @@ class App {
           gameLoop.stop(app);
         } else {
           if (firstPerson) controls.enableTracking(true);
-          //worldModule.simulateLoop.start();
-          app.modules[4].simulateLoop.start();
+          worldModule.simulateLoop.start();
           gameLoop.start(app);
         }
         gameInProgress = !gameInProgress;
         console.log({gameInProgress})
-
-        //controls.enableTracking(!gameInProgress)
-
-        
       }
     })
   }
 
+  // const getTerrainExtents = (lat, track) => {
+  //   const vertices = track.geometry.vertices;
+  //   const getLowest = (lat, vertices) => {
+  //     return vertices.reduce((acc, curr) => ( 
+  //       new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, lat)) <
+  //           new THREE.Vector2(0, acc.z).distanceTo(new THREE.Vector2(0, lat))
+  //       ? curr 
+  //       : acc
+  //     ));
+  //   }
+  //   return getLowest(lat, vertices)
+  // }
+  // console.log(getTerrainExtents(2000, track.native))
+
 } // end class
 
-new App()
+new App();

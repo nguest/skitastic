@@ -37,10 +37,6 @@ class Controls {
 		this.velocityFactor = 1;
 		this.clippingPlane = clippingPlane;
 		this.scene = scene;
-
-		console.log({a:scene})
-
-		
 		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
 		this.camera.position.set(0, 7, 18 );
@@ -83,8 +79,6 @@ class Controls {
 		.easing( TWEEN.Easing.Linear.None)
 
 		this.scene.add(this.yawObject);
-
-		let canJump = false;
 		
 		// Moves.
 		this.moveForward = false;
@@ -93,11 +87,9 @@ class Controls {
 		this.moveRight = false;
 		
 		this.addListeners(player)
-	
   }
 
   createSkis() {
-	// skis
 		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
 	}
@@ -119,13 +111,11 @@ class Controls {
 		});
   
 		///player.on('physics:added', () => {
-			player.manager.get('module:world').addEventListener('update', () => {
+		player.manager.get('module:world').addEventListener('update', () => {
 			if (this.enabled === false) return;
-				console.log('yeh')
 			this.yawObject.position.copy({x:player.position.x, y:player.position.y, z:player.position.z});
 			this.yawObject.position.y = this.yawObject.position.y + this.params.ypos
-			
-			});
+		});
 		//});
 	}
 
@@ -136,9 +126,9 @@ class Controls {
 
 	update = delta => {
 		if (this.enabled === false) {
-			//return;
+			return;
 		}
-		//  NOT SURE
+		//  NOT SURE YET
 		delta = delta || 0.5;
 		delta = Math.min(delta, 0.1, delta);
 
@@ -181,9 +171,6 @@ class Controls {
 
 		this.skis.lookAt(skiLookAt)
 		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
-		 if (this.moveLeft) {
-		//	this.skis.children[0].position.y = 3;
-		 }
 
 	// move the light and lightshadow with object
 		this.updateLights();
@@ -195,10 +182,12 @@ class Controls {
 		inputVelocity.applyQuaternion(this.quat);
 
 		this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 0});// z:inputVelocity.z ??
+		if (!this.physics.data.touches[0]) {
+			//console.log('jump!')
+		}
 	
 	// stop things getting sillyfast
 		if (this.physics.getLinearVelocity().clone().z < -200) {
-			//this.physics.setLinearVelocity({...this.physics.getLinearVelocity(), z: -50})
 			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 10});
 		}        
 		//this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });

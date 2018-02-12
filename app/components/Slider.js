@@ -33,7 +33,6 @@ class Slider {
 
         position: APPCONFIG.startPosition
     }).addTo(app);
-    //if (!isDev) slider.native.visible = false;
     console.log({slider})
     return slider;
   };
