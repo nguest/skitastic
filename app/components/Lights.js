@@ -5,13 +5,13 @@ import APPCONFIG, { isDev } from '../AppConfig';
 class Lights {
   constructor(app,scene) {
 
-    const pow = 12;
-    const l = 500;
+    const pow = 11;
+    const l = 30;
     this.dlight = new WHS.DirectionalLight( {
 
       color: 0xDDDDff,
       intensity: 1.5,
-      distance: 300,
+      distance: 100,
       decay: 0.1,
 
       castShadow: true,
@@ -19,24 +19,42 @@ class Lights {
       position: APPCONFIG.lightPosition,//[10,100,10],
 
       shadow: Object.assign({
-        fov: 90,
+        //fov: 90,
+        // camera: {
+        //   near: 20,
+        //   far: 100,
+        //   left: -400,
+        //   right: 400,
+        //   top: 400,
+        //   bottom: -400,
+        // },
         camera: {
           near: 20,
           far: 100,
-          left: -400,
-          right: 400,
-          top: 400,
-          bottom: -400,
+          left: -l,
+          right: l,
+          top: l,
+          bottom: -l,
         },
         //radius: 0.1,
         mapSize: {
           width: Math.pow(2,pow),
           height: Math.pow(2,pow),
         }
-      }, {shadowMap: THREE.PCFSoftShadowMap}),
+      }), //{shadowMap: THREE.PCFSoftShadowMap}),
       
     })
     this.dlight.addTo(app);
+
+    // light for shiny
+    this.dlight2 = new WHS.DirectionalLight( {
+      color: 0xDDDDff,
+      intensity: 0.5,
+      distance: 300,
+      decay: 0.1,
+      position: [10,20,-110],
+
+    }).addTo(app)
 
     console.log({isDev})
     const helper = new THREE.DirectionalLightHelper(this.dlight.native)

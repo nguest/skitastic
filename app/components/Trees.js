@@ -50,7 +50,7 @@ class Trees {
 
       if (intersects.length) {
         const xyzTreeLocation = intersects[0].point;
-        xyzTreeLocation.y = xyzTreeLocation.y -80;
+        xyzTreeLocation.y = xyzTreeLocation.y -60;
 
         const tree = new Tree(xyzTreeLocation)
         this.scene.add(tree);
@@ -62,7 +62,7 @@ class Trees {
   createShadowDecal(xyzTreeLocation) {
     const decalPosition = new THREE.Vector3(xyzTreeLocation.x - 50, xyzTreeLocation.y, xyzTreeLocation.z);
     var geometry =  new DecalGeometry( this.terrainOuter, decalPosition, new THREE.Euler(0,0, 0, 'XYZ' ), new THREE.Vector3( 200, 100, 50 ));
-    var material = new THREE.MeshPhongMaterial( { color: 0x5577aa, side: THREE.DoubleSide, opacity: 0.3, transparent: true } );
+    var material = new THREE.MeshPhongMaterial( { color: 0x5577aa, side: THREE.DoubleSide, opacity: 0.5, transparent: true } );
     var decalMesh = new THREE.Mesh( geometry, material );
     this.scene.add( decalMesh );
   }

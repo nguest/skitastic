@@ -55,6 +55,15 @@ class Controls {
 		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
 		this.scene.add(this.yawObject);
+
+		let vN = this.physics.getLinearVelocity().clone();
+		vN.normalize();
+		var origin = player.position;
+		var length = 100;
+		var hex = 0xffff00;
+
+		// this.arrowHelper = new THREE.ArrowHelper( vN, origin, length, hex );
+		// this.scene.add( this.arrowHelper );
 		
 		// this.yawObject.position.y = this.params.ypos; // eyes are 2 meters above the ground
 		if (isDev) this.scene.add(this.targetObject)
@@ -92,6 +101,9 @@ class Controls {
   createSkis() {
 		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
+		var box = new THREE.BoxHelper( this.yawObject, 0xffff00 );
+		console.log(this.yawObject)
+		this.scene.add( box );
 	}
  
   enableTracking(isEnabled) {
@@ -119,11 +131,6 @@ class Controls {
 		//});
 	}
 
-	getDirection(targetVec) {
-		targetVec.set(0, 0, -1);
-		this.quat.multiplyVector3(targetVec);
-	}
-
 	update = delta => {
 		if (this.enabled === false) {
 			return;
@@ -138,12 +145,10 @@ class Controls {
 		let speed = this.velocityFactor * delta * this.params.speed;
 
 		if (this.moveLeft) {
-			console.log('LEFT')
 			inputVelocity.x = -speed;
 			inputVelocity.z = speed * 0.5;
 		}
 		if (this.moveRight) {
-			console.log('RIGHT')
 			inputVelocity.x = speed;
 			inputVelocity.z = speed * 0.5;
 		}
@@ -160,17 +165,25 @@ class Controls {
 
 		//if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
 		const pos = this.yawObject.position.clone();
-		const lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
-		lookAt.min(new THREE.Vector3(1000,-30,-200))
+		let lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+		//lookAt.min(new THREE.Vector3(1000,-30,-200))
+
 		//lookAt.min(new THREE.Vector3(0,-10,-1))
-		this.camera.native.lookAt(lookAt)
+		this.camera.native.lookAt(vN.clone())
 		//console.log({lookAt})
-		const skiLookAt = lookAt.clone()
+		let skiLookAt = lookAt.clone()
+	
 
 		this.targetObject.position.set(lookAt.x,lookAt.y,lookAt.z)
 
-		this.skis.lookAt(skiLookAt)
+		this.skis.lookAt(vN.clone())
 		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
+		// const y =  this.skis.children[0].position;
+		// this.skis.children[0].position.y += 0.05 * this.skis.children[0].rotation.z
+
+		
+
+		//console.log(this.yawObject.rotation.z)
 
 	// move the light and lightshadow with object
 		this.updateLights();
@@ -185,7 +198,6 @@ class Controls {
 		if (!this.physics.data.touches[0]) {
 			//console.log('jump!')
 		}
-	
 	// stop things getting sillyfast
 		if (this.physics.getLinearVelocity().clone().z < -200) {
 			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 10});

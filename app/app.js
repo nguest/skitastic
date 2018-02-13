@@ -72,7 +72,8 @@ class App {
       )
       .module(this.worldModule)
       .module(new WHS.OrbitControlsModule())
-      .module(new WHS.ResizeModule());
+      .module(new WHS.ResizeModule())
+      .module(new WHS.FogModule({color: 0xd6ddff, density: 0.0001}));
     if (isDev) this.app.module(new StatsModule());
 
     // renderer shadow hack
@@ -81,7 +82,7 @@ class App {
     // clipping planes
     this.clippingPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), APPCONFIG.clipDistance );
 
-    this.app.modules[3].renderer.localClippingEnabled = true,
+   this.app.modules[3].renderer.localClippingEnabled = true,
     this.app.modules[3].renderer.clippingPlanes = [ this.clippingPlane ]
     console.log({ta:this.app})
 
@@ -132,7 +133,7 @@ class App {
     Promise.all([finish, fences, terrainOuter, centerLine, track, slider])
     .then(([finish, fences, terrainOuter, centerLine, track, slider ])=>{
       track.native.name = 'track';
-      
+      slider.native.castShadow = false;
 
     //   var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(0, 1, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
     //   var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );

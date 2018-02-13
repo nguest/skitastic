@@ -26,10 +26,10 @@ class Slider {
             wireframe: true
         }),
 
-        shadow: {
-            cast: true,
-            receive: true,
-        },        
+        // shadow: {
+        //     cast: true,
+        //     receive: true,
+        // },        
 
         position: APPCONFIG.startPosition
     }).addTo(app);

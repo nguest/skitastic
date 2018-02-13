@@ -45,7 +45,8 @@ class Gate {
     const portalMaterial = new THREE.MeshPhongMaterial({
       color: 0xffaabb,
       transparent: true,
-      opacity: 0.15,
+      ///opacity: 0.15,
+      wireframe: true,
     })
 
     this.portal = new WHS.Plane({
@@ -64,7 +65,7 @@ class Gate {
   
       material: portalMaterial,
 
-      position: this.position,
+      position: [this.position.x, this.position.y + 20, this.position.z],
 
     })
 

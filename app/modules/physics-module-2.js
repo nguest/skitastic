@@ -1482,7 +1482,7 @@ var WorldModuleBase = (_temp2 = _class = function (_Eventable) {
   rateLimit: true,
   ammo: "http://localhost:8085/ammo.js",
   softbody: false,
-  gravity: new three.Vector3(0, -100, 0)
+  gravity: new three.Vector3(0, -150, 0)
 }, _temp2);
 
 var TARGET = typeof Symbol === 'undefined' ? '__target' : Symbol();

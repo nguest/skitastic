@@ -7,7 +7,6 @@ const isMobile = (function() {
 })();
 
 export const isDev = false;
-//export isDev;
 
 const APPCONFIG = {
   appDefaults: {
@@ -34,7 +33,7 @@ const APPCONFIG = {
     }
   },
   clipDistance: 10000,
-  startPosition: new THREE.Vector3(-59.3,-30,0),
+  startPosition: new THREE.Vector3(-59.3,-35,0),
   lightPosition: new THREE.Vector3(50,50,40),
 
 }
@@ -43,9 +42,9 @@ export const gateConfig = [
   {x:-100, z: -500, w: 100},
   {x:-40, z: -1600, w: 100},
   {x:-30, z: -1800, w: 100},
-  {x:-10, z: -2800, w: 70},
-  {x:-50, z: -4000, w: 70},
-  {x:20, z: -8000, w: 100},
+  {x:10, z: -2800, w: 70},
+  {x:100, z: -4000, w: 70},
+  {x:600, z: -8000, w: 100},
   {x: 279, z: -37212, w: 200, isFinish: true }
    
 ]
