@@ -68,8 +68,11 @@ class Gate {
       position: [this.position.x, this.position.y + 20, this.position.z],
 
     })
-
-    this.portal.native.name = 'gate-' + this.idx
+    if (this.idx === 2) {
+      this.portal.native.name = 'gate-finish';
+    } else {
+      this.portal.native.name = 'gate-' + this.idx
+    }
     
     this.portal.addTo(app)
   }

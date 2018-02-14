@@ -7,7 +7,6 @@ import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
 import Trees, { Tree } from './components/Trees';
 import Fences from './components/Fences';
-
 import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
@@ -15,6 +14,8 @@ import Finish from './components/Finish';
 
 import Misc from './components/Misc';
 import Controls from './modules/Controls';
+
+import GameState from './GameState';
 
 import DecalGeometry from './modules/DecalGeometry';
 
@@ -27,18 +28,18 @@ class App {
 
   constructor() {
 
-    const gameState = {
-
-    }
+    this.gameState = new GameState();
 
     this.scene = new THREE.Scene();
     let gameInProgress = false;
     this.gameInProgress = gameInProgress;
     let firstPerson = true;
+    this.overLay = document.querySelector('#overLay');
     this.speedDisplay =  document.querySelector('#speedDisplay');
     this.timeDisplay =  document.querySelector('#timeDisplay');
     this.statusDisplay =  document.querySelector('#statusDisplay');
-    //this.gameLoop() = this.gameLoop.bind(this)
+    this.bigDisplay = document.querySelector('#bigDisplay');
+    this.bigDisplay.innerHTML = 'press space to start'
 
 
     let activeCamera = new WHS.DefineModule('camera',
@@ -101,7 +102,7 @@ class App {
     this.fences = Fences(this.app);  
     this.finish = new Finish(this.app); 
     this.lights = new Lights(this.app, this.scene);
-    this.timeDisplay = document.querySelector('#timeDisplay');
+
 
     // finally, do the thing:
 
@@ -132,31 +133,35 @@ class App {
     } = this;
     Promise.all([finish, fences, terrainOuter, centerLine, track, slider])
     .then(([finish, fences, terrainOuter, centerLine, track, slider ])=>{
-      track.native.name = 'track';
+
+    // name objects //
+      [fences, terrainOuter, track].map(object => object.native.name = [object])
+
+    // update slider params //
+      if (!isDev) slider.native.visible = false;
       slider.native.castShadow = false;
 
-    //   var geometry =  new DecalGeometry( track.native, new THREE.Vector3(0,0,0), new THREE.Euler(0, 1, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
-    //   var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    //   var mesh = new THREE.Mesh( geometry, material );
-    // // scene.add( mesh );
-      if (!isDev) slider.native.visible = false;
-
+    // add trees //
       const trees = new Trees(scene, terrainOuter.native);
 
       fences.native.material[0].transparent = true;
-      fences.native.name = 'fence';
 
-      const vs = centerLine;
-      const lineV = vs.filter(v => (v.y < 100))
-      const lineGeo = new THREE.Geometry();
-      lineGeo.vertices = vs;
-      const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x0000ff,linewidth: 20, }));
-      if (isDev) scene.add(line);
+    // setup centerLine //
+      if (isDev) {
+        const vs = centerLine;
+        const lineV = vs.filter(v => (v.y < 100))
+        const lineGeo = new THREE.Geometry();
+        lineGeo.vertices = vs;
+        const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x0000ff,linewidth: 20, }));
+        scene.add(line);
+      }
 
+    // setup gates //
       const gates = Gates(app, track.native.geometry.vertices);
+      this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
+    // do some collision handling //
       slider.on('collision',  (otherObject, v, r, contactNormal) => {
-        console.log(otherObject.name);
         if (otherObject.name !== 'track') this.collisionStatus = 'hit ' + otherObject.name;
         let collided;
         if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
@@ -165,8 +170,7 @@ class App {
         }
       });
 
-      this.collidableMeshList = gates.map(gate => gate.getPortalObject())
-
+    // setup controls //
       if (firstPerson) {
         this.controls = new Controls({
           scene, 
@@ -180,18 +184,22 @@ class App {
         });
       }
 
+    // setup gameLoop //
+
       this.gameLoop = new WHS.Loop((clock) => {
 
-        const delta = clock.getElapsedTime();
+        this.delta = clock.getElapsedTime();
     
         //if (this.firstPerson) 
-        this.controls.update(delta);
+        this.controls.update(this.delta);
     
-        this.displayStatus(delta);
+        this.displayStatus(this.delta);
     
         this.detectGateCollisions(slider);
         
       })
+
+    // add eventlisteners //
 
       this.addEventListeners(gameInProgress, firstPerson)
       app.start();
@@ -200,12 +208,9 @@ class App {
   }
 
 
-
-
   //////////////////////////////////////
-  // Loop and start              
+  // other class methods             
   //////////////////////////////////////
-
   
 
   displayStatus = (delta) => {
@@ -213,6 +218,10 @@ class App {
     this.timeDisplay.innerHTML = delta.toFixed(2)
     this.statusDisplay.innerHTML = this.collisionStatus || '';
 
+  }
+
+  updateBigDisplay = (message) => {
+    this.bigDisplay.innerHTML = message
   }
 
   detectGateCollisions = (slider) => {
@@ -233,26 +242,35 @@ class App {
       const ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
       const collisionResults = ray.intersectObjects( this.collidableMeshList );
       if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
-        console.log(" Hit ", collisionResults[0].object.name);
-        this.collisionStatus = " Hit " + collisionResults[0].object.name
+        const collidee = collisionResults[0].object.name;
+        if (collidee === 'gate-finish') {
+          return this.endGame();
+        }
+
+        console.log(" Hit ", collidee);
+        this.collisionStatus = "Hit " + collidee
+        this.gameState.setState({ [collidee]: this.delta })
+
       }
     })
   }
 
-  startGame = () => {
-    if (firstPerson) controls.enableTracking(true);
-    worldModule.simulateLoop.start();
-    gameLoop.start(app);
-  }
-
-  stopGame = () => {
+  endGame = () => {
     const { app, worldModule, gameLoop, controls } = this;
-    if (firstPerson) controls.enableTracking(false);
-    worldModule.simulateLoop.stop();
+    const slowDownPeriod = 1000;
+    setTimeout(() =>{
+      worldModule.simulateLoop.stop();
+      controls.enableTracking(false);
+    }, slowDownPeriod)
     gameLoop.stop(app);
+
+    this.gameState.setState({ finalTime: this.delta })
+
+    console.log('gameState',this.gameState.getState())
+    this.updateBigDisplay(`Finish: ${this.delta.toFixed(2)}`);
+    this.overLay.classList = 'paused';
+
   }
-
-
 
   //////////////////////////////////////
   // Event Listeners                
@@ -265,12 +283,7 @@ class App {
   //   worldModule.simulateLoop.start()
   //   gameLoop.start(app)
   // })
-  // document.getElementById('camera').addEventListener('click',()=>{
-  //   ///firstPerson = !firstPerson;
-  //   console.log(app, firstPerson, app.camera)
-  //   slider.position.set(-400,-6000,-20000)
-  //   app.start();
-  // })
+
   addEventListeners = (gameInProgress, firstPerson) => {
     const { app, worldModule, gameLoop, controls } = this;
     document.addEventListener('keydown', (e) => {
@@ -280,10 +293,14 @@ class App {
           if (firstPerson) controls.enableTracking(false);
           worldModule.simulateLoop.stop();
           gameLoop.stop(app);
+          this.updateBigDisplay('Paused');
+          this.overLay.classList = 'paused';
         } else {
           if (firstPerson) controls.enableTracking(true);
           worldModule.simulateLoop.start();
           gameLoop.start(app);
+          this.updateBigDisplay('')
+          this.overLay.classList = '';
         }
         gameInProgress = !gameInProgress;
         console.log({gameInProgress})

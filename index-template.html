@@ -12,7 +12,6 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
-        
       }
       #reset {
         position: absolute;
@@ -21,36 +20,50 @@
         padding: 20px;
         z-index: 10;
       }
-      #camera {
+      #overLay {
         position: absolute;
-        top: 20px;
-        right: 120px;
-        padding: 20px;
-        z-index: 10;
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        z-index: 5;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        background: rgba(0,0,0,0)
+      }
+
+      #overLay.paused {
+        background: rgba(0,0,0,0.6);
+        transition: background linear 0.25s;
+      }
+      
+      #overLay * {
+        display: flex;
+        /* border: 1px solid red; */
+      }
+      #topBar {
+        flex:1;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+      }
+      #topBar > * {
+        flex:1;
+        justify-content: center;
       }
       #timeDisplay {
-        position: absolute;
-        top: 20px;
-        right: 200px;
-        padding: 20px;
-        z-index: 10;
         font-size: 30px;
       }
       #speedDisplay {
-        position: absolute;
-        top: 20px;
-        left: 100px;
-        padding: 20px;
-        z-index: 10;
         font-size: 30px;
       }
       #statusDisplay {
-        position: absolute;
-        top: 20px;
-        left: 200px;
-        padding: 20px;
-        z-index: 10;
         font-size: 20px;
+      }
+      #bigDisplay {
+        flex: 3;
+        font-size: 50px;
       }
     </style>
   </head>
@@ -58,9 +71,15 @@
     <div id="app"></div>
     <!-- <button id="reset">Reset</button>
     <button id="camera">Camera</button> -->
-    <div id="timeDisplay"></div>
-    <div id="speedDisplay"></div>
-    <div id="statusDisplay"></div>
+    <div id="overLay">
+      <div id="topBar">
+        <div id="speedDisplay"></div>
+        <div id="statusDisplay"></div>
+        <div id="timeDisplay"></div>
+      </div>
+      <div id="bigDisplay"></div>
+    </div>
+
 
 
 
