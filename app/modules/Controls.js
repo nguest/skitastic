@@ -24,7 +24,7 @@ class Controls {
 		skybox, 
 		clippingPlane,
 		track,
-		params = { ypos: 0 , speed: 100 /*0.5*/ },
+		params = { ypos: 0 , speed: 100 },
 	}) {
 		this.camera = camera;
 		this.mesh = mesh;
@@ -101,9 +101,6 @@ class Controls {
   createSkis() {
 		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
-		var box = new THREE.BoxHelper( this.yawObject, 0xffff00 );
-		console.log(this.yawObject)
-		this.scene.add( box );
 	}
  
   enableTracking(isEnabled) {
@@ -111,7 +108,7 @@ class Controls {
 		//this.physics.setLinearVelocity(0,0,-0.1)
   }
 
-	addListeners(player) {
+	addListeners = (player) => {
 	   // document.addEventListener('mousemove', this.onMouseMove, false);
 		document.addEventListener('keydown', this.onKeyDown, false);
 		document.addEventListener('keyup', this.onKeyUp, false);
@@ -186,7 +183,7 @@ class Controls {
 		//console.log(this.yawObject.rotation.z)
 
 	// move the light and lightshadow with object
-		this.updateLights();
+		this.updateLightsAndSkybox();
 	// make sure TWEEN gets updates
 		TWEEN.update();
 	// update clipping
@@ -206,7 +203,7 @@ class Controls {
 		//this.physics.setAngularFactor({ x: 0, y: 0, z: 0 });
 	}
 
-	updateLights() {
+	updateLightsAndSkybox() {
 	// move the light and lightshadow with object
 		this.shadowCamera = this.light.shadow.camera;
 		const posn = this.yawObject.position.clone();

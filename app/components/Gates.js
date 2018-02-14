@@ -17,17 +17,18 @@ const Gates = (app, vertices) => {
   // make array of actual gate positions on terrain surface
   const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices)) 
   // create gates
-  const gates = gatePositions.map((gate, idx) => new Gate({ app, position: gate, w: gateConfig[idx].w, idx}) )
+  const gates = gatePositions.map((gate, idx, array) => new Gate({ app, position: gate, w: gateConfig[idx].w, idx, array}) )
   return gates;
 }
 
 class Gate {
 
-  constructor({ app, position, w, idx }) {
+  constructor({ app, position, w, idx, array }) {
     this.app = app;
     this.position = position;
     this.width = w;
     this.idx = idx;
+    this.array = array;
 
     //console.log({ app, position, w })
 
@@ -68,7 +69,7 @@ class Gate {
       position: [this.position.x, this.position.y + 20, this.position.z],
 
     })
-    if (this.idx === 2) {
+    if (this.idx === this.array.length - 1) {
       this.portal.native.name = 'gate-finish';
     } else {
       this.portal.native.name = 'gate-' + this.idx

@@ -4,16 +4,22 @@ import * as PHYSICS from '../modules/physics-module';
 import DecalGeometry from '../modules/DecalGeometry';
 
 
-
 export class Tree {
   constructor(posn) {
     const dim = { x: 120, y: 225 };
+
+    const treeMaps = [
+      './assets/pineTree.png',
+      './assets/pineTree2.png'
+    ]
+
+    var randomItem = treeMaps[Math.floor(Math.random() * treeMaps.length)];
 
     const tree = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(80,150,1,1),
       new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        map: new THREE.TextureLoader().load('./assets/pineTree.png'),
+        map: new THREE.TextureLoader().load(randomItem),
         transparent: true,
       })
     )
@@ -40,6 +46,8 @@ class Trees {
 
   createTrees() {
     const xzTreePositions = new Array(200).fill(null).map((posn, idx) => new THREE.Vector3(-600 + Math.random() * 100, 1000, -(idx * 400) ))
+    xzTreePositions.concat(new Array(200).fill(null).map((posn, idx) => new THREE.Vector3(-400 + Math.random() * 100, 1000, -(idx * 400) )))
+
     console.log({xzTreePositions})
 
     xzTreePositions.map(xzPosition => {

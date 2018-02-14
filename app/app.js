@@ -1,8 +1,9 @@
 import * as THREE from 'three';
-import APPCONFIG, { isDev } from './AppConfig';
 import * as WHS from 'whs';
 import * as PHYSICS from './modules/physics-module-2';
+import APPCONFIG, { isDev } from './AppConfig';
 import StatsModule from './modules/StatsModule';
+
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
 import Trees, { Tree } from './components/Trees';
@@ -11,25 +12,17 @@ import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
 import Finish from './components/Finish';
-
 import Misc from './components/Misc';
 import Controls from './modules/Controls';
-
 import GameState from './GameState';
-
 import DecalGeometry from './modules/DecalGeometry';
 
-
-//////////////////////////////////////
-// Setup app and three scene                  
-//////////////////////////////////////
 
 class App {
 
   constructor() {
 
     this.gameState = new GameState();
-
     this.scene = new THREE.Scene();
     let gameInProgress = false;
     this.gameInProgress = gameInProgress;
@@ -40,7 +33,6 @@ class App {
     this.statusDisplay =  document.querySelector('#statusDisplay');
     this.bigDisplay = document.querySelector('#bigDisplay');
     this.bigDisplay.innerHTML = 'press space to start'
-
 
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
@@ -53,6 +45,7 @@ class App {
       })
     );
 
+  // create the whs app //
     this.worldModule = new PHYSICS.WorldModule(APPCONFIG.appDefaults.physics);
 
     this.app = new WHS.App([
@@ -77,24 +70,17 @@ class App {
       .module(new WHS.FogModule({color: 0xd6ddff, density: 0.0001}));
     if (isDev) this.app.module(new StatsModule());
 
-    // renderer shadow hack
+  // renderer shadow hack //
     this.app.modules[3].renderer.shadowMap.enabled = true;
 
-    // clipping planes
+  // setup clipping planes //
     this.clippingPlane = new THREE.Plane( new THREE.Vector3( 0, 0, 1 ), APPCONFIG.clipDistance );
-
-   this.app.modules[3].renderer.localClippingEnabled = true,
+    this.app.modules[3].renderer.localClippingEnabled = true,
     this.app.modules[3].renderer.clippingPlanes = [ this.clippingPlane ]
+    
     console.log({ta:this.app})
 
-    //this.controls;
-
-
-    //////////////////////////////////////
-    // Get the objects                   
-    //////////////////////////////////////
-
-
+  // get the objects //               
     this.camera = this.app.manager.get('camera')
     this.skybox = new SkyBox(this.app, this.scene);
     this.slider = new Slider(this.app);
@@ -104,8 +90,7 @@ class App {
     this.lights = new Lights(this.app, this.scene);
 
 
-    // finally, do the thing:
-
+  // finally, initialize the world //:
     this.initWorld(gameInProgress, firstPerson);
 
   }
@@ -131,17 +116,18 @@ class App {
       lights, 
       clippingPlane,
     } = this;
-    Promise.all([finish, fences, terrainOuter, centerLine, track, slider])
+    Promise.all([ finish, fences, terrainOuter, centerLine, track, slider ])
     .then(([finish, fences, terrainOuter, centerLine, track, slider ])=>{
 
     // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
+      console.log(track.native)
 
     // update slider params //
       if (!isDev) slider.native.visible = false;
       slider.native.castShadow = false;
 
-    // add trees //
+    // setup trees //
       const trees = new Trees(scene, terrainOuter.native);
 
       fences.native.material[0].transparent = true;
@@ -162,7 +148,7 @@ class App {
     
     // do some collision handling //
       slider.on('collision',  (otherObject, v, r, contactNormal) => {
-        if (otherObject.name !== 'track') this.collisionStatus = 'hit ' + otherObject.name;
+        if (typeof otherObject.name === 'string') this.collisionStatus = 'hit ' + otherObject.name;
         let collided;
         if (contactNormal.y < 0.5) {// Use a "good" threshold value between 0 and 1 here!
           collided = true;
@@ -190,7 +176,6 @@ class App {
 
         this.delta = clock.getElapsedTime();
     
-        //if (this.firstPerson) 
         this.controls.update(this.delta);
     
         this.displayStatus(this.delta);
@@ -214,10 +199,9 @@ class App {
   
 
   displayStatus = (delta) => {
-    this.speedDisplay.innerHTML = parseInt(this.controls.displaySpeed());
-    this.timeDisplay.innerHTML = delta.toFixed(2)
+    this.speedDisplay.innerHTML = parseInt(this.controls.displaySpeed() * 0.25);
+    this.timeDisplay.innerHTML = delta.toFixed(2).padStart(5, '0');
     this.statusDisplay.innerHTML = this.collisionStatus || '';
-
   }
 
   updateBigDisplay = (message) => {
@@ -248,8 +232,10 @@ class App {
         }
 
         console.log(" Hit ", collidee);
+        if (typeof collidee )
         this.collisionStatus = "Hit " + collidee
         this.gameState.setState({ [collidee]: this.delta })
+        //console.log(this.gameState.getState())
 
       }
     })

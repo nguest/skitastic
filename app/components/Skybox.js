@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
+import APPCONFIG from '../AppConfig';
 
 class SkyBox {
   constructor(app, scene) {
@@ -27,10 +28,6 @@ class SkyBox {
 
     const size = 300;
 
-    // var skybox = WHS.MeshComponent.create(
-    //     new THREE.BoxGeometry(100, 100, 100),
-    //     skyBoxMaterial
-    // );
     this.skybox = new THREE.Mesh(
         new THREE.BoxGeometry(size, size, size),
         skyBoxMaterial
@@ -39,7 +36,11 @@ class SkyBox {
     this.skybox.rotation.set(0, Math.PI/4,0);
     this.skybox.matrixWorldNeedsUpdate = true;
     this.skybox.material.needsUpdate = true;
-    this.skybox.position.set(0,-50,-400)
+    this.skybox.position.set(
+      APPCONFIG.startPosition.x,
+      APPCONFIG.startPosition.y - 10,
+      APPCONFIG.startPosition.z - 300
+    )
 
     scene.add(this.skybox)
     console.log(this.skybox)

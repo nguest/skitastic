@@ -58,6 +58,10 @@
       #speedDisplay {
         font-size: 30px;
       }
+      #speedDisplay:after {
+        content: ' kmh';
+        position: relative;
+      }
       #statusDisplay {
         font-size: 20px;
       }
@@ -73,9 +77,9 @@
     <button id="camera">Camera</button> -->
     <div id="overLay">
       <div id="topBar">
-        <div id="speedDisplay"></div>
+        <div id="speedDisplay">0</div>
         <div id="statusDisplay"></div>
-        <div id="timeDisplay"></div>
+        <div id="timeDisplay">00:00</div>
       </div>
       <div id="bigDisplay"></div>
     </div>
