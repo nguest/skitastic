@@ -24,7 +24,7 @@ class Controls {
 		skybox, 
 		clippingPlane,
 		track,
-		params = { ypos: 0 , speed: 100 },
+		params = { ypos: 0 , speed: 150, retardation: 30 },
 	}) {
 		this.camera = camera;
 		this.mesh = mesh;
@@ -40,6 +40,9 @@ class Controls {
 		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
 		this.camera.position.set(0, 7, 18 );
+
+		console.log(this.camera)
+		//this.camera.native.up.y = 1
 		
 		/* Init */
 		const player = this.mesh;
@@ -55,6 +58,7 @@ class Controls {
 		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
 		this.scene.add(this.yawObject);
+
 
 		let vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
@@ -101,6 +105,8 @@ class Controls {
   createSkis() {
 		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
+
+		//this.skis.add(this.camera.native)
 	}
  
   enableTracking(isEnabled) {
@@ -123,7 +129,6 @@ class Controls {
 		player.manager.get('module:world').addEventListener('update', () => {
 			if (this.enabled === false) return;
 			this.yawObject.position.copy({x:player.position.x, y:player.position.y, z:player.position.z});
-			this.yawObject.position.y = this.yawObject.position.y + this.params.ypos
 		});
 		//});
 	}
@@ -152,7 +157,7 @@ class Controls {
 
 	// Convert velocity to world coordinates
 		const euler = new THREE.Euler();
-		euler.x = this.targetObject.rotation.x;
+		euler.x = this.yawObject.rotation.x;
 		euler.y = this.yawObject.rotation.y;
 		euler.order = 'XYZ';
 		this.quat.setFromEuler(euler);
@@ -163,13 +168,11 @@ class Controls {
 		//if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
 		const pos = this.yawObject.position.clone();
 		let lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
-		//lookAt.min(new THREE.Vector3(1000,-30,-200))
 
-		//lookAt.min(new THREE.Vector3(0,-10,-1))
-		this.camera.native.lookAt(vN.clone())
-		//console.log({lookAt})
-		let skiLookAt = lookAt.clone()
-	
+		console.log('y',this.yawObject)
+		this.camera.rotation.y = this.yawObject.rotation.y
+		this.camera.rotation.z = this.yawObject.rotation.z
+
 
 		this.targetObject.position.set(lookAt.x,lookAt.y,lookAt.z)
 
@@ -177,10 +180,6 @@ class Controls {
 		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
 		// const y =  this.skis.children[0].position;
 		// this.skis.children[0].position.y += 0.05 * this.skis.children[0].rotation.z
-
-		
-
-		//console.log(this.yawObject.rotation.z)
 
 	// move the light and lightshadow with object
 		this.updateLightsAndSkybox();
@@ -196,8 +195,8 @@ class Controls {
 			//console.log('jump!')
 		}
 	// stop things getting sillyfast
-		if (this.physics.getLinearVelocity().clone().z < -200) {
-			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 10});
+		if (this.physics.getLinearVelocity().clone().z < -350) {
+			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: this.params.retardation});
 		}        
 		//this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });
 		//this.physics.setAngularFactor({ x: 0, y: 0, z: 0 });

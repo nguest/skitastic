@@ -12,11 +12,12 @@ import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
 import Finish from './components/Finish';
+import Rocks from './components/Rocks';
 import Misc from './components/Misc';
 import Controls from './modules/Controls';
 import GameState from './GameState';
 import DecalGeometry from './modules/DecalGeometry';
-
+import Label from './components/Label';
 
 class App {
 
@@ -26,13 +27,15 @@ class App {
     this.scene = new THREE.Scene();
     let gameInProgress = false;
     this.gameInProgress = gameInProgress;
-    let firstPerson = true;
+    this.firstPerson = true;
     this.overLay = document.querySelector('#overLay');
     this.speedDisplay =  document.querySelector('#speedDisplay');
     this.timeDisplay =  document.querySelector('#timeDisplay');
     this.statusDisplay =  document.querySelector('#statusDisplay');
     this.bigDisplay = document.querySelector('#bigDisplay');
     this.bigDisplay.innerHTML = 'press space to start'
+
+   // this.overLay.style.display = 'flex'
 
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
@@ -87,11 +90,12 @@ class App {
     [ this.track, this.terrainOuter, this.centerLine ] = new Terrain(this.app);
     this.fences = Fences(this.app);  
     this.finish = new Finish(this.app); 
+    this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
 
 
   // finally, initialize the world //:
-    this.initWorld(gameInProgress, firstPerson);
+    this.initWorld(this.gameInProgress, this.firstPerson);
 
   }
 
@@ -115,13 +119,19 @@ class App {
       skybox, 
       lights, 
       clippingPlane,
+      rocks
     } = this;
-    Promise.all([ finish, fences, terrainOuter, centerLine, track, slider ])
-    .then(([finish, fences, terrainOuter, centerLine, track, slider ])=>{
-
+    Promise.all([ finish, fences, terrainOuter, centerLine, track, slider, rocks ])
+    .then(([finish, fences, terrainOuter, centerLine, track, slider, rocks ])=>{
+      
     // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
       console.log(track.native)
+
+      terrainOuter.native.visible = false;
+
+      //fences.native.position.set(0,10000,0)
+
 
     // update slider params //
       if (!isDev) slider.native.visible = false;
@@ -129,6 +139,9 @@ class App {
 
     // setup trees //
       const trees = new Trees(scene, terrainOuter.native);
+
+      const label = new Label();
+      label.addTo(this.app)
 
       fences.native.material[0].transparent = true;
 
@@ -176,7 +189,7 @@ class App {
 
         this.delta = clock.getElapsedTime();
     
-        this.controls.update(this.delta);
+        if (firstPerson) this.controls.update(this.delta);
     
         this.displayStatus(this.delta);
     
@@ -254,7 +267,7 @@ class App {
 
     console.log('gameState',this.gameState.getState())
     this.updateBigDisplay(`Finish: ${this.delta.toFixed(2)}`);
-    this.overLay.classList = 'paused';
+    if (isDev === false) this.overLay.classList = 'paused';
 
   }
 
@@ -280,7 +293,7 @@ class App {
           worldModule.simulateLoop.stop();
           gameLoop.stop(app);
           this.updateBigDisplay('Paused');
-          this.overLay.classList = 'paused';
+          if (isDev === false) ethis.overLay.classList = 'paused';
         } else {
           if (firstPerson) controls.enableTracking(true);
           worldModule.simulateLoop.start();

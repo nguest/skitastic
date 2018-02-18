@@ -11,10 +11,6 @@ const Skis = (track, scene) => {
   //skis.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z)
 
   const ski =  new THREE.JSONLoader().load('./assets/ski.json', (ski, materials) => {
-    console.log({ski, materials})
-    //ski.computeVertexNormals()
-   // ski.computeFaceNormals()
-    //ski.rotateX(Math.PI).rotateY(Math.PI/2);
     const material = new THREE.MeshPhongMaterial({color:0xaaff00})
     const skiMeshL = new THREE.Mesh(ski,materials[0])
     const skiMeshR = new THREE.Mesh(ski,materials[0])

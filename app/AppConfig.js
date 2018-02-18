@@ -6,7 +6,7 @@ const isMobile = (function() {
   return check;
 })();
 
-export const isDev = false;
+export const isDev = true;
 
 const APPCONFIG = {
   appDefaults: {
@@ -32,20 +32,22 @@ const APPCONFIG = {
       ammo: 'http://localhost:8085/ammo.js'
     }
   },
-  clipDistance: 10000,
-  startPosition: new THREE.Vector3(-59.3,-35,0),
+  clipDistance: 40000,
+  startPosition: new THREE.Vector3(0,-3,-20),
   lightPosition: new THREE.Vector3(50,50,40),
 
 }
 
 export const gateConfig = [
   {x:-100, z: -500, w: 100},
-  {x:-40, z: -1600, w: 100},
+  {x:-200, z: -1600, w: 100},
   {x:-30, z: -2200, w: 100},
   {x:10, z: -2800, w: 70},
+  {x:100, z: -3200, w: 70},
   {x:100, z: -4000, w: 70},
-  {x:600, z: -8000, w: 100},
-  {x: 279, z: -37212, w: 200, isFinish: true }
+  {x:400, z: -6000, w: 100},
+  {x:700, z: -8000, w: 100},
+  {x: 210, z: -37212, w: 290, isFinish: true }
    
 ]
 
