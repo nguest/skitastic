@@ -18,6 +18,7 @@ import Controls from './modules/Controls';
 import GameState from './GameState';
 import DecalGeometry from './modules/DecalGeometry';
 import Label from './components/Label';
+import { CanvasRenderer } from 'three';
 
 class App {
 
@@ -126,15 +127,10 @@ class App {
       
     // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
-      console.log(fences.native.material)
-      fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping
-      fences.native.material[0].map.repeat.set(1,3)
 
-      //THREE.RepeatWrapping
 
+      
       //terrainOuter.native.visible = false;
-
-      //fences.native.position.set(0,10000,0)
 
 
     // update slider params //
@@ -147,20 +143,16 @@ class App {
       const label = new Label();
       label.addTo(this.app)
 
+    // setup fences //
       fences.native.material[0].transparent = true;
+      fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping
+      fences.native.material[0].map.repeat.set(1,3)
 
     // setup centerLine //
-      if (isDev) {
-        const vs = centerLine;
-        const lineV = vs.filter(v => (v.y < 100))
-        const lineGeo = new THREE.Geometry();
-        lineGeo.vertices = vs;
-        const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0x0000ff,linewidth: 20, }));
-        scene.add(line);
-      }
+      centerLine.native.visible = false;
 
     // setup gates //
-      const gates = Gates(app, track.native.geometry.vertices);
+      const gates = Gates(app, centerLine.native.geometry.vertices);
       this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
     // do some collision handling //

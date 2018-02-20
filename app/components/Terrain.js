@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
-import centerLine from '../components/centerLine';
+//import centerLine from '../components/centerLine';
 
 class Terrain {
 
@@ -30,6 +30,15 @@ class Terrain {
       shadow: {
         receive: true
       },
+      position: {
+        y: 0
+      },
+    }).addTo(app)
+
+
+    const centerLine = new WHS.Importer({
+      loader: new THREE.JSONLoader(),
+      url: './assets/centerLine.json',
       position: {
         y: 0
       },

@@ -59,6 +59,8 @@ class Controls {
 		this.yawObject = new THREE.Object3D();
 		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
+		this.camera.native.lookAt(0,2.5,-200)
+
 		this.scene.add(this.yawObject);
 		console.log(this.camera.native)
 

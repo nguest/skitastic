@@ -2,10 +2,10 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 
 export default class Label extends WHS.MeshComponent {
-  constructor(params = { position: [0,-100,-500], size:100}) {
+  constructor(params = {}) {
     super(params, Object.assign(WHS.MeshComponent.defaults, {
       text: 'Hello world!',
-      color: '#ffffff',
+      color: '#ff0000',
       size: 40
     }));
   }
@@ -33,6 +33,7 @@ export default class Label extends WHS.MeshComponent {
     const sprite = new THREE.Sprite(
       new THREE.SpriteMaterial({map: texture})
     );
+    console.log({sprite})
 
     return sprite;
   }

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 import { gateConfig } from '../AppConfig';
+import Label from './Label';
 
 // reduces to a 3d object with x,y,z
 const makeGatePosition = (goal, vertices) => {
@@ -13,9 +14,19 @@ const makeGatePosition = (goal, vertices) => {
   ));
 }
 
+const getCenterlinePoint = (goal, vertices) => {
+  return vertices.reduce((acc, curr) => ( 
+    new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, goal.z)) < 
+        new THREE.Vector2(0, acc.z).distanceTo(new THREE.Vector2(0, goal.z))
+    ? curr 
+    : acc
+  ));
+}
+
 const Gates = (app, vertices) => {
   // make array of actual gate positions on terrain surface
-  const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices)) 
+  //const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices)) 
+  const gatePositions = gateConfig.map(gate => getCenterlinePoint(gate, vertices)) 
   // create gates
   const gates = gatePositions.map((gate, idx, array) => new Gate({ app, position: gate, w: gateConfig[idx].w, idx, array}) )
   return gates;
@@ -40,6 +51,7 @@ class Gate {
     }
     this.createPortal(app);
     this.createPoles(app);
+    this.createLabel(app);
   }
 
   createPortal = (app) => {
@@ -143,6 +155,15 @@ class Gate {
     poleL.native.name = poleR.native.name = 'pole';
     poleL.addTo(app);
     poleR.addTo(app);
+  }
+
+  createLabel = (app) => {
+    const labelDisplace = new Label({
+      text: this.idx,
+      size: 30,
+      scale: [100, 100, 1],
+      position: [this.position.x, this.position.y + 25, this.position.z]
+    }).addTo(app);
   }
 }
 
