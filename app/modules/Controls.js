@@ -24,7 +24,11 @@ class Controls {
 		skybox, 
 		clippingPlane,
 		track,
-		params = { ypos: 0 , speed: 150, retardation: 30 },
+		params = { 
+			speed: 150, 
+			retardation: 30,
+			turnFactor: 0.5
+	  },
 	}) {
 		this.camera = camera;
 		this.mesh = mesh;
@@ -39,10 +43,8 @@ class Controls {
 		this.scene = scene;
 		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
-		this.camera.position.set(0, 7, 18 );
+		//this.camera.position.set(0, 10, 25 );
 
-		console.log(this.camera)
-		//this.camera.native.up.y = 1
 		
 		/* Init */
 		const player = this.mesh;
@@ -58,7 +60,13 @@ class Controls {
 		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
 		this.scene.add(this.yawObject);
+		console.log(this.camera.native)
 
+		var helper = new THREE.CameraHelper( this.camera.native );
+		this.scene.add( helper );
+
+		//this.camera.native.lookAt(0,-10,0)
+		//this.camera.native.target = this.targetObject;
 
 		let vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
@@ -79,12 +87,16 @@ class Controls {
 		this.tRight = new TWEEN.Tween(this.yawObject.rotation)
 		.to({z: -0.5}, 1000 )
 		.onUpdate(() => {})
-		.easing( TWEEN.Easing.Linear.None)
+	//	.easing( TWEEN.Easing.Linear.None)
+		.easing( TWEEN.Easing.Sinusoidal.In )
+
 
 		this.tLeft = new TWEEN.Tween(this.yawObject.rotation)
 		.to({z: 0.5}, 600 )
 		.onUpdate(() => {})
-		.easing( TWEEN.Easing.Linear.None)
+		//.easing( TWEEN.Easing.Linear.None)
+		.easing( TWEEN.Easing.Sinusoidal.In )
+
 
 		this.tReturn = new TWEEN.Tween(this.yawObject.rotation)
 		.to({z: 0}, 600 )
@@ -106,7 +118,7 @@ class Controls {
 		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
 
-		//this.skis.add(this.camera.native)
+	//this.skis.add(this.camera.native)
 	}
  
   enableTracking(isEnabled) {
@@ -148,12 +160,13 @@ class Controls {
 
 		if (this.moveLeft) {
 			inputVelocity.x = -speed;
-			inputVelocity.z = speed * 0.5;
+			inputVelocity.z = speed * this.params.turnFactor;
 		}
 		if (this.moveRight) {
 			inputVelocity.x = speed;
-			inputVelocity.z = speed * 0.5;
+			inputVelocity.z = speed * this.params.turnFactor;
 		}
+		//this.camera.native.rotation.set(0,0,Math.PI)
 
 	// Convert velocity to world coordinates
 		const euler = new THREE.Euler();
@@ -165,17 +178,26 @@ class Controls {
 		const vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
 
-		//if (this.physics.getLinearVelocity() < 1) inputVelocity.z = 5;
+	// dev targetObject
 		const pos = this.yawObject.position.clone();
 		let lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
+		this.targetObject.position.set(lookAt.x,lookAt.y + 10,lookAt.z)
+		//this.camera.native.lookAt(this.targetObject.position.x, this.targetObject.position.y, this.targetObject.position.z)
+		this.camera.native.lookAt(this.yawObject.position.x,this.yawObject.position.y + 5,this.yawObject.position.z)
+		//this.camera.native.loo
+	//	this.yawObject.lookAt(this.targetObject)
 
-		console.log('y',this.yawObject)
-		this.camera.rotation.y = this.yawObject.rotation.y
-		this.camera.rotation.z = this.yawObject.rotation.z
+
+	// rotate camera
+		//this.camera.rotation.y = this.yawObject.rotation.y
+		this.camera.rotation.y = this.yawObject.rotation.z
+		this.camera.native.lookAt(0,2.5,0)
+		this.camera.position.set(Math.asin(this.yawObject.rotation.z) * 20, 10,28)
+		console.log(this.yawObject.rotation)
+	//	this.camera.rotation.z = this.yawObject.rotation.z * 0.5
 
 
-		this.targetObject.position.set(lookAt.x,lookAt.y,lookAt.z)
-
+	// ski rotation
 		this.skis.lookAt(vN.clone())
 		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
 		// const y =  this.skis.children[0].position;

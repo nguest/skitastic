@@ -22,12 +22,6 @@ const Skis = (track, scene) => {
     skis.add(skiMeshR)
   });
 
-  console.warn({track})
-
-  var geometry =  new DecalGeometry( track.native, skis.position, new THREE.Euler(0, 1, 0, 'XYZ' ), new THREE.Vector3( 100, 100, 100 ));
-  var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-  var mesh = new THREE.Mesh( geometry, material );
-  //skis.add( mesh );
 
   return skis;
 

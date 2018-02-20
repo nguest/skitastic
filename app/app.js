@@ -40,11 +40,11 @@ class App {
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
         position: new THREE.Vector3(0, 20, 0),
-        target: new THREE.Vector3(0, -20, 400),
+       // target: new THREE.Vector3(0, 300, 400),
         rotation: new THREE.Vector3(0, 0, 0),
         far: 25000,
         near: 0.1,
-        fov: 35,
+        fov: 25, //35
       })
     );
 
@@ -126,9 +126,13 @@ class App {
       
     // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
-      console.log(track.native)
+      console.log(fences.native.material)
+      fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping
+      fences.native.material[0].map.repeat.set(1,3)
 
-      terrainOuter.native.visible = false;
+      //THREE.RepeatWrapping
+
+      //terrainOuter.native.visible = false;
 
       //fences.native.position.set(0,10000,0)
 

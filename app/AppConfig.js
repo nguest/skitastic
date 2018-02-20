@@ -27,7 +27,6 @@ const APPCONFIG = {
       },
       shadow: true,
     },
-  
     physics: {
       ammo: 'http://localhost:8085/ammo.js'
     }
@@ -39,12 +38,9 @@ const APPCONFIG = {
 }
 
 export const gateConfig = [
-  {x:-100, z: -500, w: 100},
-  {x:-200, z: -1600, w: 100},
-  {x:-30, z: -2200, w: 100},
-  {x:10, z: -2800, w: 70},
-  {x:100, z: -3200, w: 70},
-  {x:100, z: -4000, w: 70},
+  {x: 150, z: -1200, w: 100},
+  {x: -80, z: -3000, w: 90},
+  {x:350, z: -4700, w: 180},
   {x:400, z: -6000, w: 100},
   {x:700, z: -8000, w: 100},
   {x: 210, z: -37212, w: 290, isFinish: true }
