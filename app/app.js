@@ -89,7 +89,7 @@ class App {
     this.skybox = new SkyBox(this.app, this.scene);
     this.slider = new Slider(this.app);
     [ this.track, this.terrainOuter, this.centerLine ] = new Terrain(this.app);
-    this.fences = Fences(this.app);  
+    [ this.fencesPhysics, this.fences ] = new Fences(this.app);  
     this.finish = new Finish(this.app); 
     this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
@@ -112,6 +112,7 @@ class App {
       camera, 
       finish, 
       fences, 
+      fencesPhysics,
       terrainOuter, 
       centerLine, 
       track, 
@@ -122,16 +123,41 @@ class App {
       clippingPlane,
       rocks
     } = this;
-    Promise.all([ finish, fences, terrainOuter, centerLine, track, slider, rocks ])
-    .then(([finish, fences, terrainOuter, centerLine, track, slider, rocks ])=>{
+    Promise.all([ finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks ])
+    .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks ])=>{
       
     // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
 
+      console.log({t:track.native.geometry})
 
-      
       //terrainOuter.native.visible = false;
+      track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
+        map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
+        map.repeat.set(10,10)
+      });
+      track.native.material[0].normalScale.set(0.3,0.3)
+      //track.native.material[0].shininess = 80;
+      // track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
+      //   map.wrapT = map.wrapS = THREE.RepeatWrapping
+      //   map.repeat.set(3,1)
+      // });
+      track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
+        map.wrapT = map.wrapS = THREE.RepeatWrapping
+        map.repeat.set(3,1)
+      });
+      track.native.material[0].displacementScale = 5
+      //track.native.material[0].wireframe = true;
+     // track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png');
 
+      track.native.material[0].bumpMap = null;
+      //track.native.material[0].map = null;
+
+      //track.native.material[0].needsUpdate = true;
+
+      console.log(track.native.material[0])
+
+      ///Users/nicholasguest/Desktop/BoxSync/htdocs/whs-webpack/assets/seamless-ice-snow-normal-mapping_640v640.jpg
 
     // update slider params //
       if (!isDev) slider.native.visible = false;
@@ -145,14 +171,15 @@ class App {
 
     // setup fences //
       fences.native.material[0].transparent = true;
+      fencesPhysics.native.visible = false;
       fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping
-      fences.native.material[0].map.repeat.set(1,3)
+      fences.native.material[0].map.repeat.set(1,1)
 
     // setup centerLine //
       centerLine.native.visible = false;
 
     // setup gates //
-      const gates = Gates(app, centerLine.native.geometry.vertices);
+      const gates = Gates(app, centerLine.native.geometry.vertices, track.native);
       this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
     // do some collision handling //

@@ -31,8 +31,8 @@ const APPCONFIG = {
       ammo: 'http://localhost:8085/ammo.js'
     }
   },
-  clipDistance: 40000,
-  startPosition: new THREE.Vector3(0,-3,-20),
+  clipDistance: 10000,
+  startPosition: new THREE.Vector3(0,-13,-20),
   lightPosition: new THREE.Vector3(50,50,40),
 
 }

@@ -3,6 +3,7 @@ import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 import { gateConfig } from '../AppConfig';
 import Label from './Label';
+import { Vertex } from 'three';
 
 // reduces to a 3d object with x,y,z
 const makeGatePosition = (goal, vertices) => {
@@ -14,6 +15,31 @@ const makeGatePosition = (goal, vertices) => {
   ));
 }
 
+const getGateOuterPoints = (centerPoint, track) => {
+  
+  const directionVector = new THREE.Vector3(0,-1,0)
+  const offset = 100;
+  const leftRayOrigin = new THREE.Vector3(centerPoint.x -50, centerPoint.y + offset, centerPoint.z)
+  const rightRayOrigin = new THREE.Vector3(centerPoint.x +50, centerPoint.y + offset, centerPoint.z)
+
+  let leftOffsetY = 0;
+  let rightOffsetY = 0;
+  const leftRay = new THREE.Raycaster( leftRayOrigin, directionVector.clone() );
+  const collisionResultsL = leftRay.intersectObject( track );
+  if ( collisionResultsL.length > 0 && collisionResultsL[0] ) {
+    const collisionPointL = collisionResultsL[0].point;
+    leftOffsetY = collisionPointL.y - centerPoint.y  ;
+  }
+  const rightRay = new THREE.Raycaster( rightRayOrigin, directionVector.clone() );
+  const collisionResultsR = rightRay.intersectObject( track );
+  if ( collisionResultsR.length > 0 && collisionResultsR[0] ) {
+    const collisionPointR = collisionResultsR[0].point;
+    rightOffsetY = collisionPointR.y - centerPoint.y  ;
+  }
+  return { leftOffsetY, rightOffsetY }
+
+}
+
 const getCenterlinePoint = (goal, vertices) => {
   return vertices.reduce((acc, curr) => ( 
     new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, goal.z)) < 
@@ -23,23 +49,42 @@ const getCenterlinePoint = (goal, vertices) => {
   ));
 }
 
-const Gates = (app, vertices) => {
+const Gates = (app, vertices, track) => {
   // make array of actual gate positions on terrain surface
   //const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices)) 
-  const gatePositions = gateConfig.map(gate => getCenterlinePoint(gate, vertices)) 
+  const gatePositions = gateConfig.map(gate => {
+
+    const centerPoint = getCenterlinePoint(gate, vertices)
+    const outerPoints = getGateOuterPoints(centerPoint, track)
+    console.log(outerPoints)
+
+    return { centerPoint, outerPoints };
+
+  })
+ // console.log(gatePositions)
   // create gates
-  const gates = gatePositions.map((gate, idx, array) => new Gate({ app, position: gate, w: gateConfig[idx].w, idx, array}) )
+  const gates = gatePositions.map((gate, idx, array) => 
+    new Gate({ app, 
+      position: gate.centerPoint, 
+      outerPoints: gate.outerPoints,
+      w: gateConfig[idx].w, 
+      idx, 
+      array
+    }) 
+  )
   return gates;
 }
 
 class Gate {
 
-  constructor({ app, position, w, idx, array }) {
+  constructor({ app, position, outerPoints, w, idx, array }) {
     this.app = app;
     this.position = position;
     this.width = w;
     this.idx = idx;
     this.array = array;
+    this.outerPoints = outerPoints;
+console.log({outerPoints})
 
     //console.log({ app, position, w })
 
@@ -132,7 +177,7 @@ class Gate {
       geometry,
       position: [
         this.position.x - (this.width + this.params.poleWidth)/2,
-        this.position.y + 25,
+        this.position.y + 25 + this.outerPoints.leftOffsetY,
         this.position.z + 20,
       ],
       rotation,
@@ -145,7 +190,7 @@ class Gate {
       rotation,
       position: [
         this.position.x + (this.width + this.params.poleWidth)/2,
-        this.position.y + 25,
+        this.position.y + 25 + this.outerPoints.rightOffsetY,
         this.position.z + 20,
       ],
       modules,
@@ -162,7 +207,7 @@ class Gate {
       text: this.idx,
       size: 30,
       scale: [100, 100, 1],
-      position: [this.position.x, this.position.y + 25, this.position.z]
+      position: [this.position.x, this.position.y + 30, this.position.z]
     }).addTo(app);
   }
 }

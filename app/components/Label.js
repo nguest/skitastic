@@ -4,7 +4,7 @@ import * as WHS from 'whs';
 export default class Label extends WHS.MeshComponent {
   constructor(params = {}) {
     super(params, Object.assign(WHS.MeshComponent.defaults, {
-      text: 'Hello world!',
+      text: '',
       color: '#ff0000',
       size: 40
     }));
@@ -14,8 +14,8 @@ export default class Label extends WHS.MeshComponent {
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
 
-    const {canvas, ctx} = this;
-    const {text, bgColor, color, size} = this.params;
+    const { canvas, ctx } = this;
+    const { text, bgColor, color, size } = this.params;
 
     ctx.font = `Bold ${size}px Arial`;
     ctx.fillStyle = color;
@@ -33,7 +33,6 @@ export default class Label extends WHS.MeshComponent {
     const sprite = new THREE.Sprite(
       new THREE.SpriteMaterial({map: texture})
     );
-    console.log({sprite})
 
     return sprite;
   }

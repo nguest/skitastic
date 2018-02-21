@@ -38,12 +38,11 @@ class SkyBox {
     this.skybox.material.needsUpdate = true;
     this.skybox.position.set(
       APPCONFIG.startPosition.x,
-      APPCONFIG.startPosition.y - 10,
-      APPCONFIG.startPosition.z - 300
+      APPCONFIG.startPosition.y - 100,
+      APPCONFIG.startPosition.z - 450
     )
 
     scene.add(this.skybox)
-    console.log(this.skybox)
   }
   getCube() {
     return this.skybox;

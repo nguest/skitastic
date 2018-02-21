@@ -13,14 +13,14 @@ export class Tree {
       './assets/pineTree2.png'
     ]
 
-    var randomItem = treeMaps[Math.floor(Math.random() * treeMaps.length)];
+    var randomTreeMap = treeMaps[Math.floor(Math.random() * treeMaps.length)];
 
     const tree = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(this.dim.x,this.dim.y,1,1),
       new THREE.MeshBasicMaterial({
         color: 0xffffff,
         //color: 0xff0000,
-        map: new THREE.TextureLoader().load(randomItem),
+        map: new THREE.TextureLoader().load(randomTreeMap),
         transparent: true,
       })
     )
@@ -41,17 +41,19 @@ class Trees {
     this.terrainOuter = terrainOuter;
     this.scene = scene;
     this.terrainOuter.geometry.computeBoundingBox()
-    console.log({g:this.terrainOuter.geometry.boundingBox})
 
     this.createTrees(this.dim)
-
   }
 
   createTrees(dim) {
-    const xzTreePositions = new Array(200).fill(null).map((posn, idx) => new THREE.Vector3(-640 + Math.random() * 100, 1000, -(idx * 400) ))
-    xzTreePositions.concat(new Array(200).fill(null).map((posn, idx) => new THREE.Vector3(-400 + Math.random() * 100, 1000, -(idx * 400) )))
+    const xRows = [-650,-400, 400, 600];
 
-    console.log({xzTreePositions})
+    const xzTreePositionsArray = xRows.map(xRow => {
+      return new Array(200).fill(null).map((posn, idx) => (
+        new THREE.Vector3(xRow + Math.random() * 100, 1000, -(idx * 400) ))
+      );
+    });
+    const xzTreePositions = [].concat(...xzTreePositionsArray)
 
     xzTreePositions.map(xzPosition => {
       const raycaster = new THREE.Raycaster();
@@ -71,8 +73,8 @@ class Trees {
   }
 
   createShadowDecal(xyzTreeLocation) {
-    const decalPosition = new THREE.Vector3(xyzTreeLocation.x - 0, xyzTreeLocation.y, xyzTreeLocation.z);
-    var geometry =  new DecalGeometry( this.terrainOuter, decalPosition, new THREE.Euler(-Math.PI/2,0, 0, 'XYZ' ), new THREE.Vector3( 200, 100, 100 ));
+    const decalPosition = new THREE.Vector3(xyzTreeLocation.x -100, xyzTreeLocation.y + 50, xyzTreeLocation.z + 150);
+    var geometry =  new DecalGeometry( this.terrainOuter, decalPosition, new THREE.Euler(0,0,Math.PI/2, 'XYZ' ), new THREE.Vector3( 200, 200, 500 ));
     var material = new THREE.MeshPhongMaterial( { color: 0x5577aa, side: THREE.DoubleSide, opacity: 1, transparent: true } );
     var decalMesh = new THREE.Mesh( geometry, material );
     this.scene.add( decalMesh );

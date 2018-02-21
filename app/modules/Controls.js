@@ -27,7 +27,7 @@ class Controls {
 		params = { 
 			speed: 150, 
 			retardation: 30,
-			turnFactor: 0.5
+			turnFactor: 2
 	  },
 	}) {
 		this.camera = camera;
@@ -53,7 +53,7 @@ class Controls {
 
 		// for dev so we can see the target
 		this.targetObject = new THREE.Mesh(
-			new THREE.SphereBufferGeometry(0.2,8,8)
+			new THREE.SphereBufferGeometry(0.2,1,8)
 		);
 		
 		this.yawObject = new THREE.Object3D();
@@ -195,7 +195,7 @@ class Controls {
 		this.camera.rotation.y = this.yawObject.rotation.z
 		this.camera.native.lookAt(0,2.5,0)
 		this.camera.position.set(Math.asin(this.yawObject.rotation.z) * 20, 10,28)
-		console.log(this.yawObject.rotation)
+		//console.log(this.yawObject.rotation)
 	//	this.camera.rotation.z = this.yawObject.rotation.z * 0.5
 
 
@@ -236,8 +236,8 @@ class Controls {
 			posn.z + APPCONFIG.lightPosition.z)
 		this.light.target = this.yawObject;
 
-		this.skybox.position.z = posn.z -300;
-		this.skybox.position.y = posn.y -10;
+		this.skybox.position.z = posn.z -450;
+		this.skybox.position.y = posn.y -100;
 		this.skybox.position.x = posn.x;
 	}
 

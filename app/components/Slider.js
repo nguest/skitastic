@@ -33,7 +33,7 @@ class Slider {
 
         position: APPCONFIG.startPosition
     }).addTo(app);
-    console.log({slider})
+    
     return slider;
   };
 }
