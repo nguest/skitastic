@@ -123,13 +123,17 @@ class App {
       clippingPlane,
       rocks
     } = this;
-    Promise.all([ finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks ])
-    .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks ])=>{
+
+    Promise.all([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks])
+    .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks]) => {
       
+
     // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
 
-      console.log({t:track.native.geometry})
+      console.log({t:track})
+
+      //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
 
       //terrainOuter.native.visible = false;
       track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
@@ -137,6 +141,8 @@ class App {
         map.repeat.set(10,10)
       });
       track.native.material[0].normalScale.set(0.3,0.3)
+      track.native.material[0].side = THREE.FrontSide;
+      //track.native.material[0].depthWrite = false;
       //track.native.material[0].shininess = 80;
       // track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
       //   map.wrapT = map.wrapS = THREE.RepeatWrapping
@@ -151,6 +157,7 @@ class App {
      // track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png');
 
       track.native.material[0].bumpMap = null;
+
       //track.native.material[0].map = null;
 
       //track.native.material[0].needsUpdate = true;
@@ -174,6 +181,7 @@ class App {
       fencesPhysics.native.visible = false;
       fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping
       fences.native.material[0].map.repeat.set(1,1)
+      //fences.native.visible = false;//destroy()
 
     // setup centerLine //
       centerLine.native.visible = false;
@@ -216,7 +224,7 @@ class App {
     
         this.displayStatus(this.delta);
     
-        this.detectGateCollisions(slider);
+        //this.detectGateCollisions(slider);
         
       })
 

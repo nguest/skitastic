@@ -43,7 +43,7 @@ class Controls {
 		this.scene = scene;
 		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
-		//this.camera.position.set(0, 10, 25 );
+		this.camera.position.set(0, 10, 28 );
 
 		
 		/* Init */
@@ -168,7 +168,6 @@ class Controls {
 			inputVelocity.x = speed;
 			inputVelocity.z = speed * this.params.turnFactor;
 		}
-		//this.camera.native.rotation.set(0,0,Math.PI)
 
 	// Convert velocity to world coordinates
 		const euler = new THREE.Euler();
@@ -184,27 +183,20 @@ class Controls {
 		const pos = this.yawObject.position.clone();
 		let lookAt = new THREE.Vector3(pos.x + vN.x, pos.y + vN.y, pos.z + vN.y)
 		this.targetObject.position.set(lookAt.x,lookAt.y + 10,lookAt.z)
-		//this.camera.native.lookAt(this.targetObject.position.x, this.targetObject.position.y, this.targetObject.position.z)
-		this.camera.native.lookAt(this.yawObject.position.x,this.yawObject.position.y + 5,this.yawObject.position.z)
-		//this.camera.native.loo
-	//	this.yawObject.lookAt(this.targetObject)
 
-
-	// rotate camera
-		//this.camera.rotation.y = this.yawObject.rotation.y
-		this.camera.rotation.y = this.yawObject.rotation.z
+	//  camera
 		this.camera.native.lookAt(0,2.5,0)
-		this.camera.position.set(Math.asin(this.yawObject.rotation.z) * 20, 10,28)
-		//console.log(this.yawObject.rotation)
-	//	this.camera.rotation.z = this.yawObject.rotation.z * 0.5
-
+		this.camera.native.position.x = - this.skis.rotation.toVector3().y * 25;
 
 	// ski rotation
 		this.skis.lookAt(vN.clone())
 		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
-		// const y =  this.skis.children[0].position;
-		// this.skis.children[0].position.y += 0.05 * this.skis.children[0].rotation.z
+		this.skis.children[0].position.y = Math.min(0, - this.yawObject.rotation.z *4 ) - 4.9
+		this.skis.children[1].position.y = Math.min(0, this.yawObject.rotation.z * 4) - 4.9
 
+
+		//console.log(this.yawObject.rotation.z,Math.min(0, - this.yawObject.rotation.z *4 ),Math.min(0, this.yawObject.rotation.z * 4))
+		this.skis.position.y
 	// move the light and lightshadow with object
 		this.updateLightsAndSkybox();
 	// make sure TWEEN gets updates

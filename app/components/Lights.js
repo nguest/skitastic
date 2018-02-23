@@ -5,7 +5,7 @@ import APPCONFIG, { isDev } from '../AppConfig';
 class Lights {
   constructor(app,scene) {
 
-    const pow = 11;
+    const pow = 10;
     const l = 30;
     this.dlight = new WHS.DirectionalLight( {
 

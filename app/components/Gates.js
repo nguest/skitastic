@@ -56,8 +56,7 @@ const Gates = (app, vertices, track) => {
 
     const centerPoint = getCenterlinePoint(gate, vertices)
     const outerPoints = getGateOuterPoints(centerPoint, track)
-    console.log(outerPoints)
-
+    console.log({outerPoints})
     return { centerPoint, outerPoints };
 
   })
@@ -84,8 +83,6 @@ class Gate {
     this.idx = idx;
     this.array = array;
     this.outerPoints = outerPoints;
-console.log({outerPoints})
-
     //console.log({ app, position, w })
 
     this.params = {

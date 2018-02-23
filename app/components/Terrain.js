@@ -9,11 +9,15 @@ class Terrain {
     const track = new WHS.Importer({
       loader: new THREE.JSONLoader(),
       url: './assets/track2.json',
+
       modules: [
         new PHYSICS.ConcaveModule({
           friction: 0.3,
           mass: 0,
-          restitution: 0.5,
+          restitution: 0.1,
+          //loader: new THREE.JSONLoader(),
+          //path: './assets/track3.json',
+
         }),
       ],
       shadow: {
@@ -22,6 +26,11 @@ class Terrain {
       position: {
         y: 0
       },
+      buffer: true,
+      // parser(geometry, materials) {
+      //   //console.log({input})
+      //   return new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(geometry), materials);
+      // },
     }).addTo(app)
 
     const terrainOuter = new WHS.Importer({

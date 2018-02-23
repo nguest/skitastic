@@ -17,7 +17,7 @@ const APPCONFIG = {
       pixelRatio: isMobile ? false : window.devicePixelRatio,
   
       renderer: {
-        antialias: !isMobile,
+        antialias: false,//!isMobile,
   
         shadowMap: {
           type: isMobile ? THREE.BasicShadowMap : THREE.PCFSoftShadowMap,
@@ -32,7 +32,7 @@ const APPCONFIG = {
     }
   },
   clipDistance: 10000,
-  startPosition: new THREE.Vector3(0,-13,-20),
+  startPosition: new THREE.Vector3(0,-20,-20),
   lightPosition: new THREE.Vector3(50,50,40),
 
 }

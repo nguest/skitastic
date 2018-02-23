@@ -26,7 +26,7 @@ export const $world = {
     },
     clearColor: 0xaaaaff,
 
-    pixelRatio: isMobile ? false : window.devicePixelRatio,
+    //pixelRatio: isMobile ? false : window.devicePixelRatio,
 
     renderer: {
       antialias: !isMobile,

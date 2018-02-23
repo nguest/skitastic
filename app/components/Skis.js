@@ -4,7 +4,12 @@ import APPCONFIG from '../AppConfig';
 
 const Skis = (track, scene) => {
   const skiGeo = new THREE.BoxBufferGeometry(2,0.2,40);
-  const skiMaterial = new THREE.MeshPhongMaterial({color: 0xffff00, side: THREE.DoubleSide})
+  const skiMaterial = new THREE.MeshPhongMaterial({
+    color: 0xffff00, 
+    side: THREE.DoubleSide, 
+    depthWrite: false, 
+    //depthTest:false
+  })
 
   const skis = new THREE.Object3D();
   skis.lookAt(new THREE.Vector3(0,-0.4,-100))
@@ -18,8 +23,11 @@ const Skis = (track, scene) => {
     skiMeshR.position.set(1.5, -4.9, -15);
     skiMeshL.castShadow = skiMeshR.castShadow = true;
 
+    skiMeshL.renderOrder = 10
+    //skis.renderOrder = 10;
     skis.add(skiMeshL)
     skis.add(skiMeshR)
+    console.log({skiMeshL})
   });
 
 

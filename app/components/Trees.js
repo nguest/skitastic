@@ -74,8 +74,13 @@ class Trees {
 
   createShadowDecal(xyzTreeLocation) {
     const decalPosition = new THREE.Vector3(xyzTreeLocation.x -100, xyzTreeLocation.y + 50, xyzTreeLocation.z + 150);
-    var geometry =  new DecalGeometry( this.terrainOuter, decalPosition, new THREE.Euler(0,0,Math.PI/2, 'XYZ' ), new THREE.Vector3( 200, 200, 500 ));
-    var material = new THREE.MeshPhongMaterial( { color: 0x5577aa, side: THREE.DoubleSide, opacity: 1, transparent: true } );
+    var geometry =  new DecalGeometry( this.terrainOuter, decalPosition, new THREE.Euler(0,0,Math.PI/2, 'XYZ' ), new THREE.Vector3( 400, 200, 200 ));
+    var material = new THREE.MeshPhongMaterial({ 
+      color: 0x5577aa, 
+      side: THREE.FrontSide,
+      //map: new THREE.TextureLoader().load('./assets/treeShadow.png'),
+      opacity: 0.2, 
+      transparent: true });
     var decalMesh = new THREE.Mesh( geometry, material );
     this.scene.add( decalMesh );
   }
