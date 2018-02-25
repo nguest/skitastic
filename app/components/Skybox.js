@@ -37,9 +37,9 @@ class SkyBox {
     this.skybox.matrixWorldNeedsUpdate = true;
     this.skybox.material.needsUpdate = true;
     this.skybox.position.set(
-      APPCONFIG.startPosition.x,
-      APPCONFIG.startPosition.y - 100,
-      APPCONFIG.startPosition.z - 450
+      APPCONFIG.skyboxPosition.x,
+      APPCONFIG.skyboxPosition.y,
+      APPCONFIG.skyboxPosition.z,
     )
 
     scene.add(this.skybox)

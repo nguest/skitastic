@@ -6,7 +6,7 @@ import DecalGeometry from '../modules/DecalGeometry';
 
 export class Tree {
   constructor(posn) {
-    this.dim = { x: 120, y: 225 };
+    this.dim = { x: 180, y: 300 };
 
     const treeMaps = [
       './assets/pineTree.png',
@@ -27,7 +27,11 @@ export class Tree {
     
     tree.material.needsUpdate = true;
     tree.geometry.translate(0, this.dim.y, 0);
-    tree.rotation.set(0, Math.PI/6,0)
+    if (posn.x > 0) {
+      tree.rotation.set( Math.PI/8, -Math.PI/6,0)
+    } else {
+      tree.rotation.set( Math.PI/8, Math.PI/6,0)
+    }
     tree.position.set(posn.x,posn.y,posn.z)
     tree.castShadow = true;
     return tree;

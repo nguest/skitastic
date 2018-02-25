@@ -27,7 +27,7 @@ class Controls {
 		params = { 
 			speed: 150, 
 			retardation: 30,
-			turnFactor: 2
+			turnFactor: 4
 	  },
 	}) {
 		this.camera = camera;
@@ -176,6 +176,8 @@ class Controls {
 		euler.order = 'XYZ';
 		this.quat.setFromEuler(euler);
 
+	//	console.log(this.yawObject.position.z)
+
 		const vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
 
@@ -187,6 +189,7 @@ class Controls {
 	//  camera
 		this.camera.native.lookAt(0,2.5,0)
 		this.camera.native.position.x = - this.skis.rotation.toVector3().y * 25;
+		this.camera.native.position.y = this.skis.rotation.toVector3().x + 10;
 
 	// ski rotation
 		this.skis.lookAt(vN.clone())
@@ -196,7 +199,6 @@ class Controls {
 
 
 		//console.log(this.yawObject.rotation.z,Math.min(0, - this.yawObject.rotation.z *4 ),Math.min(0, this.yawObject.rotation.z * 4))
-		this.skis.position.y
 	// move the light and lightshadow with object
 		this.updateLightsAndSkybox();
 	// make sure TWEEN gets updates
@@ -228,9 +230,10 @@ class Controls {
 			posn.z + APPCONFIG.lightPosition.z)
 		this.light.target = this.yawObject;
 
-		this.skybox.position.z = posn.z -450;
-		this.skybox.position.y = posn.y -100;
-		this.skybox.position.x = posn.x;
+		this.skybox.position.x = posn.x + APPCONFIG.skyboxPosition.x;
+		this.skybox.position.y = posn.y + APPCONFIG.skyboxPosition.y;
+		this.skybox.position.z = posn.z + APPCONFIG.skyboxPosition.z;
+
 	}
 
 

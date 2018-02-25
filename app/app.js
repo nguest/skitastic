@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from './modules/physics-module-2';
-import APPCONFIG, { isDev } from './AppConfig';
+import APPCONFIG, { isDev, gateConfig } from './AppConfig';
 import StatsModule from './modules/StatsModule';
 
 import SkyBox from './components/Skybox';
@@ -34,9 +34,10 @@ class App {
     this.timeDisplay =  document.querySelector('#timeDisplay');
     this.statusDisplay =  document.querySelector('#statusDisplay');
     this.bigDisplay = document.querySelector('#bigDisplay');
-    this.bigDisplay.innerHTML = 'press space to start'
+    this.bigDisplay.innerHTML = 'press space to start';
+    this.gateDisplay = document.querySelector('#gateDisplay');
 
-   // this.overLay.style.display = 'flex'
+    if (!isDev) this.overLay.style.display = 'flex';
 
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
@@ -45,7 +46,7 @@ class App {
         rotation: new THREE.Vector3(0, 0, 0),
         far: 25000,
         near: 0.1,
-        fov: 25, //35
+        fov: 45
       })
     );
 
@@ -135,14 +136,14 @@ class App {
 
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
 
-      //terrainOuter.native.visible = false;
+    // setup track material
       track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
         map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
         map.repeat.set(10,10)
       });
       track.native.material[0].normalScale.set(0.3,0.3)
       track.native.material[0].side = THREE.FrontSide;
-      //track.native.material[0].depthWrite = false;
+      track.native.renderOrder = 40;
       //track.native.material[0].shininess = 80;
       // track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
       //   map.wrapT = map.wrapS = THREE.RepeatWrapping
@@ -156,11 +157,8 @@ class App {
       //track.native.material[0].wireframe = true;
      // track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png');
 
-      track.native.material[0].bumpMap = null;
+      //track.native.material[0].bumpMap = null;
 
-      //track.native.material[0].map = null;
-
-      //track.native.material[0].needsUpdate = true;
 
       console.log(track.native.material[0])
 
@@ -224,7 +222,7 @@ class App {
     
         this.displayStatus(this.delta);
     
-        //this.detectGateCollisions(slider);
+        this.detectGateCollisions(slider);
         
       })
 
@@ -243,33 +241,30 @@ class App {
   
 
   displayStatus = (delta) => {
-    this.speedDisplay.innerHTML = parseInt(this.controls.displaySpeed() * 0.25);
-    this.timeDisplay.innerHTML = delta.toFixed(2).padStart(5, '0');
-    this.statusDisplay.innerHTML = this.collisionStatus || '';
+    this.updateDisplay('speed', parseInt(this.controls.displaySpeed() * 0.25));
+    this.updateDisplay('time', delta.toFixed(2).padStart(5, '0'));
+    this.updateDisplay('status', this.collisionStatus || '')
+    //this.statusDisplay.innerHTML = this.collisionStatus || '';
   }
 
-  updateBigDisplay = (message) => {
-    this.bigDisplay.innerHTML = message
+  updateDisplay = (display, message) => {
+    this[`${display}Display`].innerHTML = message
   }
 
   detectGateCollisions = (slider) => {
   // collision detection:
-    //   determines if any of the rays from the cube's origin to each vertex
-    //		intersects any face of a mesh in the array of target meshes
-    //   for increased collision accuracy, add more vertices to the cube;
-    //		for example, new THREE.CubeGeometry( 64, 64, 64, 8, 8, 8, wireMaterial )
-    //   HOWEVER: when the origin of the ray is within the target mesh, collisions do not occur
+
     const sliderMesh = slider.native;
     const originPoint = sliderMesh.position.clone();
     
     sliderMesh.geometry.vertices.map(vertex => {
       const localVertex = vertex.clone();
-      const globalVertex = localVertex.applyMatrix4( sliderMesh.matrix );
-      const directionVector = globalVertex.sub( sliderMesh.position );
+      const globalVertex = localVertex.applyMatrix4(sliderMesh.matrix);
+      const directionVector = globalVertex.sub(sliderMesh.position);
       
-      const ray = new THREE.Raycaster( originPoint, directionVector.clone().normalize() );
+      const ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
       const collisionResults = ray.intersectObjects( this.collidableMeshList );
-      if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) {
+      if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
         const collidee = collisionResults[0].object.name;
         if (collidee === 'gate-finish') {
           return this.endGame();
@@ -279,10 +274,29 @@ class App {
         if (typeof collidee )
         this.collisionStatus = "Hit " + collidee
         this.gameState.setState({ [collidee]: this.delta })
-        //console.log(this.gameState.getState())
 
       }
     })
+    gateConfig.map((gate,idx) => {
+      // look what is in gameState
+      const gateState = this.gameState.getState()[`gate-${idx}`]
+
+      if (originPoint.z < gate.z - 50) {
+        // if miss
+        if (!gateState) {
+          this.gameState.setState({ [`gate-${idx}`]: null })
+        }
+
+        // display gateStatus
+        const stateValues = Object.values(this.gameState.getState())
+        const gateStatus = stateValues.map(value => {
+          if (value) return 'x';
+          return 'o';
+        })
+        this.updateDisplay('gate', gateStatus.join(''))
+      }
+    })
+
   }
 
   endGame = () => {
@@ -295,9 +309,10 @@ class App {
     gameLoop.stop(app);
 
     this.gameState.setState({ finalTime: this.delta })
-
-    console.log('gameState',this.gameState.getState())
-    this.updateBigDisplay(`Finish: ${this.delta.toFixed(2)}`);
+    const missedGatesNumber = Object.values(this.gameState.getState())
+      .filter(value => value === null)
+      .length
+    this.updateDisplay('big',`Finish: ${this.delta.toFixed(2)}: missed ${missedGatesNumber}`);
     if (isDev === false) this.overLay.classList = 'paused';
 
   }
@@ -305,14 +320,6 @@ class App {
   //////////////////////////////////////
   // Event Listeners                
   //////////////////////////////////////
-
-  // document.getElementById('reset').addEventListener('click',()=>{
-  //   worldModule.simulateLoop.stop()
-  //   gameLoop.stop(app)
-  //   slider.position.set(-1, 0, 0);
-  //   worldModule.simulateLoop.start()
-  //   gameLoop.start(app)
-  // })
 
   addEventListeners = (gameInProgress, firstPerson) => {
     const { app, worldModule, gameLoop, controls } = this;
@@ -323,13 +330,13 @@ class App {
           if (firstPerson) controls.enableTracking(false);
           worldModule.simulateLoop.stop();
           gameLoop.stop(app);
-          this.updateBigDisplay('Paused');
-          if (isDev === false) ethis.overLay.classList = 'paused';
+          this.updateDisplay('big','Paused');
+          if (isDev === false) this.overLay.classList = 'paused';
         } else {
           if (firstPerson) controls.enableTracking(true);
           worldModule.simulateLoop.start();
           gameLoop.start(app);
-          this.updateBigDisplay('')
+          this.updateDisplay('big','')
           this.overLay.classList = '';
         }
         gameInProgress = !gameInProgress;
@@ -337,20 +344,6 @@ class App {
       }
     })
   }
-
-  // const getTerrainExtents = (lat, track) => {
-  //   const vertices = track.geometry.vertices;
-  //   const getLowest = (lat, vertices) => {
-  //     return vertices.reduce((acc, curr) => ( 
-  //       new THREE.Vector2(0, curr.z).distanceTo(new THREE.Vector2(0, lat)) <
-  //           new THREE.Vector2(0, acc.z).distanceTo(new THREE.Vector2(0, lat))
-  //       ? curr 
-  //       : acc
-  //     ));
-  //   }
-  //   return getLowest(lat, vertices)
-  // }
-  // console.log(getTerrainExtents(2000, track.native))
 
 } // end class
 

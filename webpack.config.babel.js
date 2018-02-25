@@ -5,8 +5,8 @@ import CompressionPlugin from 'compression-webpack-plugin';
 import alias from 'whs/tools/alias';
 
 const isProduction = process.env.NODE_ENV === 'production';
+const isGame = process.env.NODE_ENV === 'game';
 //const isProduction = env.production === true
-
 
 //process.env.NODE_ENV = 'development';
 
@@ -40,7 +40,7 @@ const config = {
     ]
   },
 
-  plugins: pluginsList(isProduction),
+  plugins: pluginsList(isProduction, isGame),
 
   output: {
     path: path.join(__dirname, './build/'),
@@ -59,7 +59,7 @@ const config = {
   }
 };
 
-function pluginsList(prod) {
+function pluginsList(prod, game) {
   const plugins = [
       new webpack.optimize.ModuleConcatenationPlugin(),
       new webpack.optimize.CommonsChunkPlugin({
@@ -84,7 +84,8 @@ function pluginsList(prod) {
         minRatio: 0.8
       }),
       new webpack.DefinePlugin({
-        "process.env.NODE_ENV": JSON.stringify("development")
+        "process.env.NODE_ENV": prod || game ? JSON.stringify("production") : JSON.stringify("development"),
+        "process.env.API_URL": JSON.stringify(process.env.API_URL),
       }),
   ];
   if(prod) {

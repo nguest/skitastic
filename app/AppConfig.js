@@ -6,7 +6,11 @@ const isMobile = (function() {
   return check;
 })();
 
-export const isDev = true;
+console.log({rrr:process.env.NODE_ENV})
+export let isDev = true;
+if (process.env.NODE_ENV === 'production') {
+  isDev = false;
+}
 
 const APPCONFIG = {
   appDefaults: {
@@ -28,33 +32,39 @@ const APPCONFIG = {
       shadow: true,
     },
     physics: {
-      ammo: 'http://localhost:8085/ammo.js'
+      ammo: 'http://' + window.location.hostname + ':' + window.location.port + '/ammo.js',//'http://localhost:8085/ammo.js'
     }
   },
   clipDistance: 10000,
   startPosition: new THREE.Vector3(0,-20,-20),
   lightPosition: new THREE.Vector3(50,50,40),
-
+  skyboxPosition: new THREE.Vector3(0, -100, -150),
 }
 
 export const gateConfig = [
   {x: 150, z: -1200, w: 100},
-  {x: 150, z: -3010, w: 100},
 
-  {x: 150, z: -5510, w: 100},
-  {x: 150, z: -25380, w: 100},
-  {x: 150, z: -8390, w: 100},
+  {x: 150, z: -3010, w: 100},
+  {x: 150, z: -4010, w: 100},
+  {x: 150, z: -5510, w: 130},
+  {x: 150, z: -7600, w: 130},
+  {x: 150, z: -10350, w: 160},
+
   {x: 150, z: -12025, w: 100},
+  {x: 150, z: -13000, w: 160},
   {x: 150, z: -14620, w: 100},
-  {x: 150, z: -18510, w: 100},
-  {x: 150, z: -25380, w: 100},
-  {x: 150, z: -22750, w: 100},
+  {x: 150, z: -15800, w: 100},
+  {x: 150, z: -18510, w: 140},
+  {x: 150, z: -23400, w: 100},
   {x: 150, z: -25380, w: 100},
 
   {x: 150, z: -29050, w: 100},
+  {x: 150, z: -30500, w: 100},
   {x: 150, z: -32410, w: 100},
-
   {x: 150, z: -34960, w: 100},
+ 
+  {x: 150, z: -37100, w: 100},
+
 
   {x: 210, z: -44205, w: 290, isFinish: true }
    
