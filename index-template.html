@@ -5,7 +5,7 @@
     <title>SkiTastic</title>
     <style>
       body {
-        font-family: 'Monique', sans-serif;
+        font-family: 'Yukarimobile','Monique', sans-serif;
         position: relative;
         width: 100%;
         height: 100vh;
@@ -48,25 +48,44 @@
         flex:1;
         flex-direction: row;
         justify-content: space-around;
-        align-items: center;
+        /* align-items: center; */
         width: 100%;
+        color: white;
+        opacity: 0.5;
       }
       #topBar > * {
-        flex:1;
         justify-content: center;
       }
       #timeDisplay {
+        flex:2;
         font-size: 30px;
+        font-size: 130px;
+        justify-content: flex-end;
+        line-height: 0.75;
+      }
+      #timeDisplay > span {
+        display: inline-block;
+        width: 72px;
+      }
+      #timeDisplay > span:nth-of-type(3) {
+        display: inline-block;
+        width: 35px;
       }
       #speedDisplay {
-        font-size: 30px;
+        flex:1;
+        position: relative;
+        font-size: 50px;
       }
       #speedDisplay:after {
         content: ' kmh';
-        position: relative;
+        position: absolute;
+        top: 5px;
+        right: 20%;
+        font-size:15px;
       }
       #statusDisplay, 
       #gateDisplay {
+        flex:1;
         font-size: 20px;
       }
       #bigDisplay {

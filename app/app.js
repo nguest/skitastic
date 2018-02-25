@@ -242,13 +242,20 @@ class App {
 
   displayStatus = (delta) => {
     this.updateDisplay('speed', parseInt(this.controls.displaySpeed() * 0.25));
-    this.updateDisplay('time', delta.toFixed(2).padStart(5, '0'));
     this.updateDisplay('status', this.collisionStatus || '')
-    //this.statusDisplay.innerHTML = this.collisionStatus || '';
+
+    const time =
+      delta
+      .toFixed(2)
+      .padStart(5, '0')
+      .replace(/./g, c => (
+        `<span>${String.fromCharCode(c.charCodeAt(0))}</span>`
+      ));
+    this.updateDisplay('time', timeDisplay);
   }
 
-  updateDisplay = (display, message) => {
-    this[`${display}Display`].innerHTML = message
+  updateDisplay = (displayType, message) => {
+    this[`${displayType}Display`].innerHTML = message
   }
 
   detectGateCollisions = (slider) => {
@@ -296,7 +303,6 @@ class App {
         this.updateDisplay('gate', gateStatus.join(''))
       }
     })
-
   }
 
   endGame = () => {
@@ -309,12 +315,12 @@ class App {
     gameLoop.stop(app);
 
     this.gameState.setState({ finalTime: this.delta })
-    const missedGatesNumber = Object.values(this.gameState.getState())
+    const missedGatesNumber =
+      Object.values(this.gameState.getState())
       .filter(value => value === null)
       .length
     this.updateDisplay('big',`Finish: ${this.delta.toFixed(2)}: missed ${missedGatesNumber}`);
     if (isDev === false) this.overLay.classList = 'paused';
-
   }
 
   //////////////////////////////////////
