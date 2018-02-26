@@ -4,7 +4,7 @@ import APPCONFIG from '../AppConfig';
 
 class SkyBox {
   constructor(app, scene) {
-    const path = './assets/skybox/';
+    const path = './assets/skybox2/';
     var cubeMap = new THREE.CubeTextureLoader().load([
         path + 'right.jpg',
         path + 'left.jpg',
@@ -13,6 +13,15 @@ class SkyBox {
         path + 'front.jpg',
         path + 'back.jpg'
     ]);
+
+    var cubeMap = new THREE.CubeTextureLoader().load([
+      path + 'left.jpg',
+      path + 'right.jpg',
+      path + 'top.jpg',
+      path + 'left.jpg',
+      path + 'back.jpg',
+      path + 'back.jpg'
+  ]);
     cubeMap.format = THREE.RGBFormat;
 
     var skyShader = THREE.ShaderLib['cube'];
@@ -33,7 +42,8 @@ class SkyBox {
         skyBoxMaterial
     )
 
-    this.skybox.rotation.set(0, Math.PI/4,0);
+    this.skybox.rotation.set(0, Math.PI/2,0);
+
     this.skybox.matrixWorldNeedsUpdate = true;
     this.skybox.material.needsUpdate = true;
     this.skybox.position.set(

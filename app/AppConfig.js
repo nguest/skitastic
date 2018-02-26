@@ -16,7 +16,7 @@ const APPCONFIG = {
   appDefaults: {
   
     rendering: {
-      bgColor: 0x162129,
+      bgColor: 0x736072,
   
       pixelRatio: isMobile ? false : window.devicePixelRatio,
   
@@ -36,9 +36,9 @@ const APPCONFIG = {
     }
   },
   clipDistance: 10000,
-  startPosition: new THREE.Vector3(0,-20,-20),
+  startPosition: new THREE.Vector3(0,-25,-20),
   lightPosition: new THREE.Vector3(50,50,40),
-  skyboxPosition: new THREE.Vector3(0, -100, -150),
+  skyboxPosition: new THREE.Vector3(0, -120, -150),
 }
 
 export const gateConfig = [
@@ -50,8 +50,7 @@ export const gateConfig = [
   {x: 150, z: -7600, w: 130},
   {x: 150, z: -10350, w: 160},
 
-  {x: 150, z: -12025, w: 100},
-  {x: 150, z: -13000, w: 160},
+  {x: 150, z: -13000, w: 220},
   {x: 150, z: -14620, w: 100},
   {x: 150, z: -15800, w: 100},
   {x: 150, z: -18510, w: 140},
@@ -66,7 +65,7 @@ export const gateConfig = [
   {x: 150, z: -37100, w: 100},
 
 
-  {x: 210, z: -44205, w: 290, isFinish: true }
+  {x: 210, z: -42205, w: 300, isFinish: true }
    
 ]
 

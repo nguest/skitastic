@@ -19,19 +19,20 @@ export class Tree {
       new THREE.PlaneBufferGeometry(this.dim.x,this.dim.y,1,1),
       new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        //color: 0xff0000,
+        color: 0xc3aaa7,
         map: new THREE.TextureLoader().load(randomTreeMap),
         transparent: true,
       })
     )
     
     tree.material.needsUpdate = true;
-    tree.geometry.translate(0, this.dim.y, 0);
     if (posn.x > 0) {
-      tree.rotation.set( Math.PI/8, -Math.PI/6,0)
+      tree.rotation.set( Math.PI/10, -Math.PI/6,0)
     } else {
-      tree.rotation.set( Math.PI/8, Math.PI/6,0)
+      tree.rotation.set( Math.PI/10, Math.PI/6,0)
     }
+    tree.geometry.translate(0, this.dim.y -30, 0);
+
     tree.position.set(posn.x,posn.y,posn.z)
     tree.castShadow = true;
     return tree;
@@ -50,7 +51,7 @@ class Trees {
   }
 
   createTrees(dim) {
-    const xRows = [-650,-400, 400, 600];
+    const xRows = [-650,-400, 700, 800];
 
     const xzTreePositionsArray = xRows.map(xRow => {
       return new Array(200).fill(null).map((posn, idx) => (

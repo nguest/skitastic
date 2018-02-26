@@ -10,6 +10,7 @@ class Lights {
     this.dlight = new WHS.DirectionalLight( {
 
       color: 0xDDDDff,
+      color: 0xc3aaa7,
       intensity: 1.0,
       distance: 100,
       decay: 0.1,
@@ -49,10 +50,11 @@ class Lights {
     // light for shiny
     this.dlight2 = new WHS.DirectionalLight( {
       color: 0xDDDDff,
+      color: 0xffddaa,
       intensity: 0.8,
       distance: 300,
       decay: 0.1,
-      position: [10,20,-110],
+      position: [10,10,-110],
 
     }).addTo(app)
 

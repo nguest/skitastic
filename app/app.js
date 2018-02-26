@@ -37,6 +37,8 @@ class App {
     this.bigDisplay.innerHTML = 'press space to start';
     this.gateDisplay = document.querySelector('#gateDisplay');
 
+    this.intervalCounter = 0;
+
     if (!isDev) this.overLay.style.display = 'flex';
 
     let activeCamera = new WHS.DefineModule('camera',
@@ -72,7 +74,11 @@ class App {
       .module(this.worldModule)
       .module(new WHS.OrbitControlsModule())
       .module(new WHS.ResizeModule())
-      .module(new WHS.FogModule({color: 0xd6ddff, density: 0.0001}));
+      .module(new WHS.FogModule({
+        color: 0xd6ddff,
+        color: 0xc3aaa7,
+        density: 0.0004
+      }));
     if (isDev) this.app.module(new StatsModule());
 
   // renderer shadow hack //
@@ -139,30 +145,19 @@ class App {
     // setup track material
       track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
         map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
-        map.repeat.set(10,10)
       });
       track.native.material[0].normalScale.set(0.3,0.3)
       track.native.material[0].side = THREE.FrontSide;
-      track.native.renderOrder = 40;
-      //track.native.material[0].shininess = 80;
-      // track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
-      //   map.wrapT = map.wrapS = THREE.RepeatWrapping
-      //   map.repeat.set(3,1)
-      // });
+      track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
+        map.wrapT = map.wrapS = THREE.RepeatWrapping
+      });
       track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
         map.wrapT = map.wrapS = THREE.RepeatWrapping
         map.repeat.set(3,1)
       });
-      track.native.material[0].displacementScale = 5
-      //track.native.material[0].wireframe = true;
-     // track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png');
-
-      //track.native.material[0].bumpMap = null;
-
+      track.native.material[0].displacementScale = 8
 
       console.log(track.native.material[0])
-
-      ///Users/nicholasguest/Desktop/BoxSync/htdocs/whs-webpack/assets/seamless-ice-snow-normal-mapping_640v640.jpg
 
     // update slider params //
       if (!isDev) slider.native.visible = false;
@@ -251,11 +246,23 @@ class App {
       .replace(/./g, c => (
         `<span>${String.fromCharCode(c.charCodeAt(0))}</span>`
       ));
-    this.updateDisplay('time', timeDisplay);
+    this.updateDisplay('time', time);
   }
 
-  updateDisplay = (displayType, message) => {
-    this[`${displayType}Display`].innerHTML = message
+  updateDisplay = (displayType, message, timeOut) => {
+
+    this[`${displayType}Display`].innerHTML = message;
+
+
+
+    //   console.log(this.    this[`${displayType}Display`].innerHTML = message
+    // )
+    //   this.intervalCounter == ;
+    //   if (this.intervalCounter >= timeOut/60){
+    //     this[`${displayType}Display`].innerHTML = '';
+    //     this.intervalCounter = 0;
+    //   }
+    // }
   }
 
   detectGateCollisions = (slider) => {
@@ -270,7 +277,7 @@ class App {
       const directionVector = globalVertex.sub(sliderMesh.position);
       
       const ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-      const collisionResults = ray.intersectObjects( this.collidableMeshList );
+      const collisionResults = ray.intersectObjects(this.collidableMeshList);
       if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
         const collidee = collisionResults[0].object.name;
         if (collidee === 'gate-finish') {
@@ -278,14 +285,13 @@ class App {
         }
 
         console.log(" Hit ", collidee);
-        if (typeof collidee )
         this.collisionStatus = "Hit " + collidee
         this.gameState.setState({ [collidee]: this.delta })
 
       }
     })
     gateConfig.map((gate,idx) => {
-      // look what is in gameState
+      // look if a gate is recorded in gameState
       const gateState = this.gameState.getState()[`gate-${idx}`]
 
       if (originPoint.z < gate.z - 50) {
@@ -296,6 +302,12 @@ class App {
 
         // display gateStatus
         const stateValues = Object.values(this.gameState.getState())
+
+        if (!stateValues[stateValues.length - 1]) {
+          this.updateDisplay('big', 'Oops! Missed a gate', 2000);
+        } else {
+          this.updateDisplay('big', 'Passed Gate!', 2000);
+        }
         const gateStatus = stateValues.map(value => {
           if (value) return 'x';
           return 'o';

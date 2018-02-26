@@ -25,9 +25,9 @@ class Controls {
 		clippingPlane,
 		track,
 		params = { 
-			speed: 150, 
+			speed: 250, 
 			retardation: 30,
-			turnFactor: 4
+			turnFactor: 1
 	  },
 	}) {
 		this.camera = camera;
@@ -43,7 +43,7 @@ class Controls {
 		this.scene = scene;
 		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
-		this.camera.position.set(0, 10, 28 );
+		this.camera.position.set(0, 10, 22 );
 
 		
 		/* Init */
@@ -59,13 +59,15 @@ class Controls {
 		this.yawObject = new THREE.Object3D();
 		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
 		this.yawObject.add(this.camera.native);
-		this.camera.native.lookAt(0,2.5,-200)
+		this.camera.native.lookAt(0,-20,-60)
 
 		this.scene.add(this.yawObject);
 		console.log(this.camera.native)
 
-		var helper = new THREE.CameraHelper( this.camera.native );
-		this.scene.add( helper );
+		if (isDev) {
+			const helper = new THREE.CameraHelper( this.camera.native );
+			this.scene.add( helper );
+		}
 
 		//this.camera.native.lookAt(0,-10,0)
 		//this.camera.native.target = this.targetObject;
@@ -208,7 +210,8 @@ class Controls {
 
 		inputVelocity.applyQuaternion(this.quat);
 
-		this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: 0});// z:inputVelocity.z ??
+		this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z:inputVelocity.z});// z:inputVelocity.z ??
+	
 		if (!this.physics.data.touches[0]) {
 			//console.log('jump!')
 		}

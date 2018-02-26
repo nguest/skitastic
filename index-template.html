@@ -4,8 +4,18 @@
     <meta charset="utf-8">
     <title>SkiTastic</title>
     <style>
+      @font-face {
+        font-family: 'yukari';
+        src: url('./assets/fonts/yukari.eot');
+        src: url('./assets/fonts/yukari.eot') format('embedded-opentype'),
+            url('./assets/fonts/yukari.woff2') format('woff2'),
+            url('./assets/fonts/yukari.woff') format('woff'),
+            url('./assets/fonts/yukari.ttf') format('truetype'),
+            url('./assets/fonts/yukari.svg#yukari') format('svg');
+      }
+
       body {
-        font-family: 'Yukarimobile','Monique', sans-serif;
+        font-family: 'yukari','Monique', sans-serif;
         position: relative;
         width: 100%;
         height: 100vh;
@@ -67,7 +77,7 @@
         display: inline-block;
         width: 72px;
       }
-      #timeDisplay > span:nth-of-type(3) {
+      #timeDisplay > span:nth-last-child(3) {
         display: inline-block;
         width: 35px;
       }
