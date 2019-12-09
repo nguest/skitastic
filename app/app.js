@@ -3,6 +3,8 @@ import * as WHS from 'whs';
 import * as PHYSICS from './modules/physics-module-2';
 import APPCONFIG, { isDev, gateConfig } from './AppConfig';
 import StatsModule from './modules/StatsModule';
+import * as dat from 'dat.gui';
+
 
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
@@ -18,17 +20,26 @@ import Controls from './modules/Controls';
 import GameState from './GameState';
 import DecalGeometry from './modules/DecalGeometry';
 import Label from './components/Label';
+import TerrainGenerator from './components/TerrainGenerator';
 import { CanvasRenderer } from 'three';
 
 class App {
 
   constructor() {
+    const isDev = true;
+
+    this.debugParams = {
+      skybox: false,
+      fog: 0,
+      centerLine: false,
+      firstPerson: true,
+    };
 
     this.gameState = new GameState();
     this.scene = new THREE.Scene();
     let gameInProgress = false;
     this.gameInProgress = gameInProgress;
-    this.firstPerson = true;
+    this.firstPerson = isDev ? this.debugParams.firstPerson : true;
     this.overLay = document.querySelector('#overLay');
     this.speedDisplay =  document.querySelector('#speedDisplay');
     this.timeDisplay =  document.querySelector('#timeDisplay');
@@ -39,7 +50,7 @@ class App {
 
     this.intervalCounter = 0;
 
-    if (!isDev) this.overLay.style.display = 'flex';
+    if (isDev) this.overLay.classList = 'isDev';
 
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
@@ -77,7 +88,7 @@ class App {
       .module(new WHS.FogModule({
         color: 0xd6ddff,
         color: 0xc3aaa7,
-        density: 0.0004
+        density: isDev ? this.debugParams.fog : 0.004,
       }));
     if (isDev) this.app.module(new StatsModule());
 
@@ -89,7 +100,7 @@ class App {
     this.app.modules[3].renderer.localClippingEnabled = true,
     this.app.modules[3].renderer.clippingPlanes = [ this.clippingPlane ]
     
-    console.log({ta:this.app})
+    console.log({'this.app':this.app})
 
   // get the objects //               
     this.camera = this.app.manager.get('camera')
@@ -100,7 +111,12 @@ class App {
     this.finish = new Finish(this.app); 
     this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
+    this.terrainGenerator = new TerrainGenerator(this.app);
 
+  // GUI
+    if (isDev) {
+      this.createGUI();
+    }
 
   // finally, initialize the world //:
     this.initWorld(this.gameInProgress, this.firstPerson);
@@ -134,13 +150,15 @@ class App {
     Promise.all([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks])
     .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks]) => {
       
-
-    // name objects //
+      // name objects //
       [fences, terrainOuter, track].map(object => object.native.name = [object])
 
-      console.log({t:track})
-
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
+      const [terrain] = this.terrainGenerator;
+      console.log({ terrain, track })
+      terrain.native.material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
+        map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
+      });
 
     // setup track material
       track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
@@ -149,15 +167,18 @@ class App {
       track.native.material[0].normalScale.set(0.3,0.3)
       track.native.material[0].side = THREE.FrontSide;
       track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
-        map.wrapT = map.wrapS = THREE.RepeatWrapping
+        map.wrapT = map.wrapS = THREE.RepeatWrapping;
       });
       track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
-        map.wrapT = map.wrapS = THREE.RepeatWrapping
-        map.repeat.set(3,1)
+        map.wrapT = map.wrapS = THREE.RepeatWrapping;
+        map.repeat.set(3,1);
       });
       track.native.material[0].displacementScale = 8
 
-      console.log(track.native.material[0])
+      track.native.visible = false;
+      terrainOuter.native.visible = false;
+
+      //console.log(track.native.material[0])
 
     // update slider params //
       if (!isDev) slider.native.visible = false;
@@ -172,12 +193,14 @@ class App {
     // setup fences //
       fences.native.material[0].transparent = true;
       fencesPhysics.native.visible = false;
-      fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping
-      fences.native.material[0].map.repeat.set(1,1)
+      fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping;
+      fences.native.material[0].map.repeat.set(1,1);
       //fences.native.visible = false;//destroy()
 
-    // setup centerLine //
-      centerLine.native.visible = false;
+    // setup debug items //
+      this.centerLine = centerLine;
+      centerLine.native.visible = isDev ? this.debugParams.centerLine : false;
+      this.skybox.skybox.visible = isDev ? this.debugParams.skybox : true;
 
     // setup gates //
       const gates = Gates(app, centerLine.native.geometry.vertices, track.native);
@@ -333,6 +356,29 @@ class App {
       .length
     this.updateDisplay('big',`Finish: ${this.delta.toFixed(2)}: missed ${missedGatesNumber}`);
     if (isDev === false) this.overLay.classList = 'paused';
+  }
+
+  createGUI = () => {
+    // gui
+    console.log({ t:  this })
+    const gui = new dat.GUI();
+    gui.add( this.debugParams, 'skybox').name('Skybox').onChange(( value ) => {
+      this.debugParams.skybox = value;
+      this.skybox.skybox.visible = value;
+    });
+    gui.add( this.debugParams, 'fog' ).name('Fog').onChange(( value ) => {
+      this.debugParams.fog = value;
+      this.scene.fog.density = value;
+    });
+    gui.add( this.debugParams, 'centerLine').name('CenterLine').onChange(( value ) => {
+      this.debugParams.centerLine = value;
+      this.centerLine.native.visible = value;
+    });
+    gui.add( this.debugParams, 'firstPerson').name('FirstPerson').onChange(( value ) => {
+      this.debugParams.firstPerson = value;
+      this.firstPerson = value;
+      this.initWorld(false, value)
+    });
   }
 
   //////////////////////////////////////

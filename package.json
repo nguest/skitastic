@@ -19,6 +19,7 @@
   "homepage": "https://github.com/guestn/whs-webpack.git",
   "dependencies": {
     "@tweenjs/tween.js": "^17.2.0",
+    "dat.gui": "^0.7.6",
     "physics-module-ammonext": "^0.1.2-fix.1",
     "present": "^1.0.0",
     "three": "^0.89.0",

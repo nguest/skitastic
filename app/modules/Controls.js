@@ -213,7 +213,7 @@ class Controls {
 		this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z:inputVelocity.z});// z:inputVelocity.z ??
 	
 		if (!this.physics.data.touches[0]) {
-			//console.log('jump!')
+			console.log('jump!')
 		}
 	// stop things getting sillyfast
 		if (this.physics.getLinearVelocity().clone().z < -350) {

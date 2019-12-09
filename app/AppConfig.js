@@ -6,7 +6,7 @@ const isMobile = (function() {
   return check;
 })();
 
-console.log({rrr:process.env.NODE_ENV})
+console.log({'process.env.NODE_ENV':process.env.NODE_ENV})
 export let isDev = true;
 if (process.env.NODE_ENV === 'production') {
   isDev = false;

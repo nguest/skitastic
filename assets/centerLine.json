@@ -29,7 +29,7 @@
         "mapDiffuseRepeat":[3,1],
         "colorSpecular":[0.5,0.5,0.5],
         "depthWrite":true,
-        "opacity":1,
+        "opacity":0.2,
         "mapDiffuseAnisotropy":1,
         "doubleSided":false,
         "DbgIndex":0,

@@ -83,7 +83,7 @@ class Trees {
     var material = new THREE.MeshPhongMaterial({ 
       color: 0x5577aa, 
       side: THREE.FrontSide,
-      //map: new THREE.TextureLoader().load('./assets/treeShadow.png'),
+      map: new THREE.TextureLoader().load('./assets/treeShadow.png'),
       opacity: 0.2, 
       transparent: true });
     var decalMesh = new THREE.Mesh( geometry, material );

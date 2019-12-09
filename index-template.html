@@ -41,15 +41,14 @@
         align-items: center;
         background: rgba(0,0,0,0);
 
-        display:none;
-
       }
-
       #overLay.paused {
         background: rgba(0,0,0,0.6);
         transition: background linear 0.25s;
       }
-      
+      #overLay.isDev {
+        display: none;
+      }
       #overLay * {
         display: flex;
         /* border: 1px solid red; */
