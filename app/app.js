@@ -50,7 +50,7 @@ class App {
 
     this.intervalCounter = 0;
 
-    if (isDev) this.overLay.classList = 'isDev';
+    if (isDev) document.body.classList = 'isDev';
 
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
@@ -203,6 +203,7 @@ class App {
       this.skybox.skybox.visible = isDev ? this.debugParams.skybox : true;
 
     // setup gates //
+    console.log({ centerLine })
       const gates = Gates(app, centerLine.native.geometry.vertices, track.native);
       this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
