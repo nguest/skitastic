@@ -35,11 +35,11 @@ export default class Track extends WHS.MeshComponent {
     // calculate vertices for each centerpoint
     for (let i = 0; i < cp.length; i++) {
       vertices.push(
-        { pos: [cp[i].x - 200,  cp[i].y + 1,     cp[i].z + 0] },
-        { pos: [cp[i].x - 5,   cp[i].y + 0.3,   cp[i].z + 0] },
-        { pos: [cp[i].x + 0,   cp[i].y + 0,     cp[i].z + 0] },
-        { pos: [cp[i].x + 5,   cp[i].y + 0.3,   cp[i].z + 0] },
-        { pos: [cp[i].x + 200,  cp[i].y + 1,     cp[i].z + 0] }
+        { pos: [cp[i].x - 200,  cp[i].y + 20,     cp[i].z + 0] },
+        { pos: [cp[i].x - 150,  cp[i].y + 6,   cp[i].z + 0] },
+        { pos: [cp[i].x + 0,    cp[i].y + 0,     cp[i].z + 0] },
+        { pos: [cp[i].x + 150,  cp[i].y + 6,   cp[i].z + 0] },
+        { pos: [cp[i].x + 200,  cp[i].y + 20,    cp[i].z + 0] }
       )
     }
 
@@ -67,34 +67,33 @@ export default class Track extends WHS.MeshComponent {
   }
 
   build() {
-    const geo = this.createBufferGeometry();
-    //const geo = this.createGeometry();
+    //  const geo = this.createBufferGeometry();
+    const geo = createGeometry();
 
     const {geometry, material} = this.applyBridge({
       geometry: geo,
-      //new THREE.SphereGeometry(100, 16, 16),
-      material: new THREE.MeshPhongMaterial({ wireframe: false, color: '#ff0000'}) // red
+      material: new THREE.MeshPhongMaterial() // red
     });
     const mesh = new THREE.Mesh(
       geometry,
       material
     );
-    // mesh.material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
-    //   map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
-    // });
-    // mesh.material.normalScale.set(0.3,0.3)
-    // mesh.material.side = THREE.FrontSide;
-    // mesh.material.specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
-    //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
-    // });
-    // mesh.material.displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
-    //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
-    //   map.repeat.set(3,1);
-    // });
-    // mesh.material.displacementScale = 8
-    //mesh.setScale(200);
-   //mesh.geometry.scale(10,10,10);
-    //const normalsHelper = new THREE.VertexNormalsHelper( mesh, 2, 0x00ff00, 1 );
+
+
+    material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
+      map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
+    });
+    material.normalScale.set(0.3,0.3)
+    material.side = THREE.FrontSide;
+    material.specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
+      map.wrapT = map.wrapS = THREE.RepeatWrapping;
+    });
+    material.displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
+      map.wrapT = map.wrapS = THREE.RepeatWrapping;
+      map.repeat.set(3,1);
+    });
+    material.displacementScale = 8
+    const normalsHelper = new THREE.VertexNormalsHelper( mesh, 2, 0x00ff00, 1 );
 
     console.log({ mesh })
     return mesh;
@@ -171,33 +170,30 @@ export default class Track extends WHS.MeshComponent {
     //   {pos:  [10, 1, -10]},
     // ]
 
-  /*
-    createGeometry() {
+  
+  const createGeometry = () => {
     const vertices = [];
     // centerpoint of segment
-    let cp = [
-      { x: 0, y: 0, z: 0 },
-      { x: 0, y: -5, z: -10 },
-      { x: 2, y: -5, z: -100 },
+    // let cp = [
+    //   { x: 0, y: 0, z: 0 },
+    //   { x: 0, y: -5, z: -10 },
+    //   { x: 2, y: -5, z: -100 },
 
-    ]
-    let sp = 5; // segment point count
+    // ]
+    const cp = centerLine;
+    let o = 5; // segment point count
 
     for (let i = 0; i < cp.length; i++) {
       vertices.push(
-        { pos: [cp[i].x - 10,  cp[i].y + 1,     cp[i].z + 0] },
-        { pos: [cp[i].x - 5,   cp[i].y + 0.3,   cp[i].z + 0] },
-        { pos: [cp[i].x + 0,   cp[i].y + 0,     cp[i].z + 0] },
-        { pos: [cp[i].x + 5,   cp[i].y + 0.3,   cp[i].z + 0] },
-        { pos: [cp[i].x + 10,  cp[i].y + 1,     cp[i].z + 0] }
+        { pos: [cp[i].x - 200,  cp[i].y + 20,     cp[i].z + 0] },
+        { pos: [cp[i].x - 150,  cp[i].y + 6,   cp[i].z + 0] },
+        { pos: [cp[i].x + 0,    cp[i].y + 0,     cp[i].z + 0] },
+        { pos: [cp[i].x + 150,  cp[i].y + 6,   cp[i].z + 0] },
+        { pos: [cp[i].x + 200,  cp[i].y + 20,    cp[i].z + 0] }
       )
     }
 
-
-
     const geometry = new THREE.Geometry();
-
-    const o = 5;
 
     const faces = [];
 
@@ -218,4 +214,3 @@ export default class Track extends WHS.MeshComponent {
 
     return geometry;
   }
-*/

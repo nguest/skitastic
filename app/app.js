@@ -106,7 +106,7 @@ class App {
     this.camera = this.app.manager.get('camera')
     this.skybox = new SkyBox(this.app, this.scene);
     this.slider = new Slider(this.app);
-    [ this.track, this.terrainOuter, this.centerLine ] = new Terrain(this.app);
+    [this.terrainOuter, this.centerLine] = new Terrain(this.app);
     [ this.fencesPhysics, this.fences ] = new Fences(this.app);  
     this.finish = new Finish(this.app); 
     this.rocks = new Rocks(this.app);
@@ -138,7 +138,7 @@ class App {
       fencesPhysics,
       terrainOuter, 
       centerLine, 
-      track, 
+      //track, 
       slider, 
       scene, 
       skybox, 
@@ -147,36 +147,38 @@ class App {
       rocks
     } = this;
 
-    Promise.all([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks])
-    .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, track, slider, rocks]) => {
+    Promise.all([finish, fences, fencesPhysics, terrainOuter, centerLine, slider, rocks])
+    .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, slider, rocks]) => {
       
-      // name objects //
-      [fences, terrainOuter, track].map(object => object.native.name = [object])
+
 
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
-      const [terrain] = this.terrainGenerator;
-      console.log({ terrain, track })
-      terrain.native.material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
+      const [track] = this.terrainGenerator;
+      console.log({ track })
+      track.native.material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
         map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
       });
 
     // setup track material
-      track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
-        map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
-      });
-      track.native.material[0].normalScale.set(0.3,0.3)
-      track.native.material[0].side = THREE.FrontSide;
-      track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
-        map.wrapT = map.wrapS = THREE.RepeatWrapping;
-      });
-      track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
-        map.wrapT = map.wrapS = THREE.RepeatWrapping;
-        map.repeat.set(3,1);
-      });
-      track.native.material[0].displacementScale = 8
+      // track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
+      //   map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
+      // });
+      // track.native.material[0].normalScale.set(0.3,0.3)
+      // track.native.material[0].side = THREE.FrontSide;
+      // track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
+      //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
+      // });
+      // track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
+      //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
+      //   map.repeat.set(3,1);
+      // });
+      // track.native.material[0].displacementScale = 8
 
-      track.native.visible = false;
+      // track.native.visible = false;
       terrainOuter.native.visible = false;
+
+      // name objects //
+      [track, fences, terrainOuter].map(object => object.native.name = [object])
 
       //console.log(track.native.material[0])
 
@@ -204,8 +206,8 @@ class App {
 
     // setup gates //
     console.log({ centerLine })
-      const gates = Gates(app, centerLine.native.geometry.vertices, track.native);
-      this.collidableMeshList = gates.map(gate => gate.getPortalObject())
+      // const gates = Gates(app, centerLine.native.geometry.vertices, terrain);
+      // this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
     // do some collision handling //
       slider.on('collision',  (otherObject, v, r, contactNormal) => {
@@ -241,7 +243,7 @@ class App {
     
         this.displayStatus(this.delta);
     
-        this.detectGateCollisions(slider);
+        //this.detectGateCollisions(slider);
         
       })
 

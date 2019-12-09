@@ -27,11 +27,7 @@ class Terrain {
         y: 0
       },
       buffer: true,
-      // parser(geometry, materials) {
-      //   //console.log({input})
-      //   return new THREE.Mesh(new THREE.BufferGeometry().fromGeometry(geometry), materials);
-      // },
-    }).addTo(app)
+    })//.addTo(app)
 
     const terrainOuter = new WHS.Importer({
       loader: new THREE.JSONLoader(),
@@ -54,7 +50,7 @@ class Terrain {
     }).addTo(app)
 
   
-    return [track, terrainOuter, centerLine];
+    return [terrainOuter, centerLine];
   }
 
   getTerrain() {

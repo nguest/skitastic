@@ -8,13 +8,6 @@ class TerrainGenerator {
 
   constructor(app) {
     this.createTerrain(app);
-    // const centerLine = new WHS.Importer({
-    //   loader: new THREE.JSONLoader(),
-    //   url: './assets/centerLine.json',
-    //   position: {
-    //     y: 0
-    //   },
-    // }).addTo(app)
 
     return [this.track];
   }
@@ -35,17 +28,18 @@ class TerrainGenerator {
           friction: 0.3,
           mass: 0,
           restitution: 0.1,
-          scale: new THREE.Vector3(1,1,1),
-          position: [0,0,0]
+          //scale: new THREE.Vector3(1,1,1),
+          //position: [0,0,0]
         }),
       ],
       shadow: {
         receive: true
       },
+      buffer: true,
       // scale: 200,
       //material: terrainMaterial,
 
-      position: [0,0,0]
+      //position: [0,0,0]
     });
     console.log({ thistrack: this.track })
     
