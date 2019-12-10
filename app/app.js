@@ -21,6 +21,8 @@ import GameState from './GameState';
 import DecalGeometry from './modules/DecalGeometry';
 import Label from './components/Label';
 import TerrainGenerator from './components/TerrainGenerator';
+import PerimeterGenerator from './components/PerimeterGenerator';
+
 import { CanvasRenderer } from 'three';
 
 class App {
@@ -111,7 +113,9 @@ class App {
     this.finish = new Finish(this.app); 
     this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
+
     this.terrainGenerator = new TerrainGenerator(this.app);
+    console.log({ ttt: this.terrainGenerator })
 
   // GUI
     if (isDev) {
@@ -153,28 +157,14 @@ class App {
 
 
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
-      const [track] = this.terrainGenerator;
+      const track = this.terrainGenerator;
       console.log({ track })
-      track.native.material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
-        map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
-      });
+      const perimeterGeometries = track.perimeterGeometries;
+      console.log({ perimeterGeometries })
+      const perimeters = this.perimeterGenerator;
+      const perimeterGenerator = new PerimeterGenerator(this.app, perimeterGeometries)
 
-    // setup track material
-      // track.native.material[0].normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
-      //   map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
-      // });
-      // track.native.material[0].normalScale.set(0.3,0.3)
-      // track.native.material[0].side = THREE.FrontSide;
-      // track.native.material[0].specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
-      //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
-      // });
-      // track.native.material[0].displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
-      //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
-      //   map.repeat.set(3,1);
-      // });
-      // track.native.material[0].displacementScale = 8
 
-      // track.native.visible = false;
       terrainOuter.native.visible = false;
 
       // name objects //
@@ -193,6 +183,8 @@ class App {
       label.addTo(this.app)
 
     // setup fences //
+
+      fences.native.visible = false;
       fences.native.material[0].transparent = true;
       fencesPhysics.native.visible = false;
       fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping;

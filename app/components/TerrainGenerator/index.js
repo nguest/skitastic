@@ -9,18 +9,10 @@ class TerrainGenerator {
   constructor(app) {
     this.createTerrain(app);
 
-    return [this.track];
+    return this.track;
   }
 
   createTerrain = (app) => {
-    const terrainMaterial = new THREE.MeshPhongMaterial({
-      color: 0xffaabb,
-      //transparent: true,
-      ///opacity: 0.15,
-      wireframe: true,
-    });
-
-    
     this.track = new Track({
       build: true,
       modules: [
@@ -28,22 +20,16 @@ class TerrainGenerator {
           friction: 0.3,
           mass: 0,
           restitution: 0.1,
-          //scale: new THREE.Vector3(1,1,1),
-          //position: [0,0,0]
         }),
       ],
       shadow: {
         receive: true
       },
       buffer: true,
-      // scale: 200,
-      //material: terrainMaterial,
-
-      //position: [0,0,0]
     });
-    console.log({ thistrack: this.track })
-    
-    this.track.addTo(app)
+    this.track.addTo(app);
+    const normalsHelper = new THREE.FaceNormalsHelper( this.track.native, 20, 0xff0000, 1 );
+    app.modules[1].scene.add(normalsHelper)
     return this.track;
   }
 
