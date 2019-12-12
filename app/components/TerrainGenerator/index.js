@@ -1,18 +1,19 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../../modules/physics-module';
-//import centerLine from '../components/centerLine';
 import Track from './Track';
+import OuterTerrain from './OuterTerrain';
 
 class TerrainGenerator {
 
   constructor(app) {
-    this.createTerrain(app);
+    this.createTrack(app);
+    this.createOuterTerrain(app);
 
-    return this.track;
+    return [this.track, this.outerTerrain];
   }
 
-  createTerrain = (app) => {
+  createTrack = (app) => {
     this.track = new Track({
       build: true,
       modules: [
@@ -28,9 +29,23 @@ class TerrainGenerator {
       buffer: true,
     });
     this.track.addTo(app);
-    const normalsHelper = new THREE.FaceNormalsHelper( this.track.native, 20, 0xff0000, 1 );
+    const normalsHelper = new THREE.FaceNormalsHelper(this.track.native, 20, 0xff0000, 1);
     app.modules[1].scene.add(normalsHelper)
     return this.track;
+  }
+
+  createOuterTerrain = (app) => {
+    this.outerTerrain = new OuterTerrain({
+      build: true,
+      shadow: {
+        receive: true
+      },
+      buffer: true,
+      baseGeometries: this.track.perimeterGeometries,
+    });
+    this.outerTerrain.addTo(app);
+    const normalsHelper = new THREE.FaceNormalsHelper(this.outerTerrain.native, 20, 0xff0000, 1);
+    app.modules[1].scene.add(normalsHelper);
   }
 
   getTerrain() {

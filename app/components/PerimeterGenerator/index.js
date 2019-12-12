@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import * as PHYSICS from '../../modules/physics-module';
+import { FaceNormalsHelper } from 'three';
+import { ConcaveModule } from '../../modules/physics-module';
 import Perimeters from './Perimeters';
 
 export default class PerimeterGenerator {
@@ -10,11 +10,10 @@ export default class PerimeterGenerator {
   }
 
   createPerimeter = (app, perimeterGeometries) => {
-
     this.perimeters = new Perimeters({
       build: true,
       modules: [
-        new PHYSICS.ConcaveModule({
+        new ConcaveModule({
           friction: 0.3,
           mass: 0,
           restitution: 0.1,
@@ -27,7 +26,7 @@ export default class PerimeterGenerator {
       baseGeometries: perimeterGeometries,
     });
 
-    const normalsHelper = new THREE.FaceNormalsHelper( this.perimeters.native, 20, 0x00ff00, 1 );
+    const normalsHelper = new FaceNormalsHelper( this.perimeters.native, 20, 0x00ff00, 1 );
     app.modules[1].scene.add(normalsHelper)
     this.perimeters.addTo(app)
     return this.perimeters;

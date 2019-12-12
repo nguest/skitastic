@@ -55,6 +55,7 @@ class Lights {
       distance: 300,
       decay: 0.1,
       position: [10,10,-110],
+      //position: [0, 100, 0]
 
     }).addTo(app)
 

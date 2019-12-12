@@ -4,8 +4,7 @@ import * as PHYSICS from '../modules/physics-module';
 import APPCONFIG, { isDev } from '../AppConfig';
 
 class Slider {
-
-  constructor(app){
+  constructor(app) {
     const slider = new WHS.Sphere({ // Create sphere comonent.
         geometry: {
             radius: 5,

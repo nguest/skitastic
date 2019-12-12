@@ -39,7 +39,7 @@ class Finish {
       new THREE.Vector2(-8,0)
     ]);
     
-    const extrude = new WHS.Extrude({
+    const startGate = new WHS.Extrude({
       geometry: {
         shapes: shape,
         options: {
@@ -56,7 +56,7 @@ class Finish {
       position: [APPCONFIG.startPosition.x, APPCONFIG.startPosition.y - 5, APPCONFIG.startPosition.z + 10 ]
     });
     
-    extrude.addTo(app);
+    //startGate.addTo(app);
   
     //return this.finish;
   }

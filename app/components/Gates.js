@@ -16,7 +16,7 @@ const makeGatePosition = (goal, vertices) => {
 }
 
 const getGateOuterPoints = (centerPoint, track) => {
-  
+  //console.log({ centerPoint, track })
   const directionVector = new THREE.Vector3(0,-1,0)
   const offset = 100;
   const leftRayOrigin = new THREE.Vector3(centerPoint.x -50, centerPoint.y + offset, centerPoint.z)
@@ -24,7 +24,7 @@ const getGateOuterPoints = (centerPoint, track) => {
 
   let leftOffsetY = 0;
   let rightOffsetY = 0;
-  const leftRay = new THREE.Raycaster( leftRayOrigin, directionVector.clone() );
+  const leftRay = new THREE.Raycaster(leftRayOrigin, directionVector.clone());
   const collisionResultsL = leftRay.intersectObject( track );
   if ( collisionResultsL.length > 0 && collisionResultsL[0] ) {
     const collisionPointL = collisionResultsL[0].point;
@@ -59,7 +59,7 @@ const Gates = (app, vertices, track) => {
     return { centerPoint, outerPoints };
 
   })
- // console.log(gatePositions)
+  console.log({gatePositions})
   // create gates
   const gates = gatePositions.map((gate, idx, array) => 
     new Gate({ app, 
@@ -70,6 +70,8 @@ const Gates = (app, vertices, track) => {
       array
     }) 
   )
+
+  console.log({ gates })
   return gates;
 }
 

@@ -9,7 +9,6 @@ import * as dat from 'dat.gui';
 import SkyBox from './components/Skybox';
 import Terrain from './components/Terrain';
 import Trees, { Tree } from './components/Trees';
-import Fences from './components/Fences';
 import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
@@ -26,9 +25,8 @@ import PerimeterGenerator from './components/PerimeterGenerator';
 import { CanvasRenderer } from 'three';
 
 class App {
-
   constructor() {
-    const isDev = true;
+    console.log({ isDev })
 
     this.debugParams = {
       skybox: false,
@@ -52,8 +50,6 @@ class App {
 
     this.intervalCounter = 0;
 
-    if (isDev) document.body.classList = 'isDev';
-
     let activeCamera = new WHS.DefineModule('camera',
       new WHS.PerspectiveCamera({
         position: new THREE.Vector3(0, 20, 0),
@@ -65,7 +61,8 @@ class App {
       })
     );
 
-  // create the whs app //
+  /** create the whs world app **/
+
     this.worldModule = new PHYSICS.WorldModule(APPCONFIG.appDefaults.physics);
 
     this.app = new WHS.App([
@@ -104,24 +101,21 @@ class App {
     
     console.log({'this.app':this.app})
 
-  // get the objects //               
+  /** get the objects */
     this.camera = this.app.manager.get('camera')
     this.skybox = new SkyBox(this.app, this.scene);
     this.slider = new Slider(this.app);
     [this.terrainOuter, this.centerLine] = new Terrain(this.app);
-    [ this.fencesPhysics, this.fences ] = new Fences(this.app);  
     this.finish = new Finish(this.app); 
     this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
-
     this.terrainGenerator = new TerrainGenerator(this.app);
-    console.log({ ttt: this.terrainGenerator })
 
-  // GUI
+
     if (isDev) {
+      document.body.classList = 'isDev';
       this.createGUI();
     }
-
   // finally, initialize the world //:
     this.initWorld(this.gameInProgress, this.firstPerson);
 
@@ -134,15 +128,10 @@ class App {
   initWorld = (gameInProgress, firstPerson) => {
     const { 
       app, 
-      collisionStatus, 
-      collidableMeshList, 
       camera, 
       finish, 
-      fences, 
-      fencesPhysics,
       terrainOuter, 
       centerLine, 
-      //track, 
       slider, 
       scene, 
       skybox, 
@@ -151,57 +140,41 @@ class App {
       rocks
     } = this;
 
-    Promise.all([finish, fences, fencesPhysics, terrainOuter, centerLine, slider, rocks])
-    .then(([finish, fences, fencesPhysics, terrainOuter, centerLine, slider, rocks]) => {
+    Promise.all([finish, terrainOuter, centerLine, slider, rocks])
+    .then(([finish, terrainOuter, centerLine, slider, rocks]) => {
       
 
 
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
-      const track = this.terrainGenerator;
-      console.log({ track })
-      const perimeterGeometries = track.perimeterGeometries;
-      console.log({ perimeterGeometries })
-      const perimeters = this.perimeterGenerator;
-      const perimeterGenerator = new PerimeterGenerator(this.app, perimeterGeometries)
+      const [track, outerTerrain] = this.terrainGenerator;
+      const perimeterGenerator = new PerimeterGenerator(this.app, track.perimeterGeometries)
 
 
       terrainOuter.native.visible = false;
 
       // name objects //
-      [track, fences, terrainOuter].map(object => object.native.name = [object])
+      [track, terrainOuter].map(object => object.native.name = [object])
 
-      //console.log(track.native.material[0])
-
-    // update slider params //
+      // update slider params //
       if (!isDev) slider.native.visible = false;
       slider.native.castShadow = false;
 
-    // setup trees //
-      const trees = new Trees(scene, terrainOuter.native);
+      // setup trees //
+      const trees = new Trees(scene, outerTerrain.native);
 
       const label = new Label();
       label.addTo(this.app)
 
-    // setup fences //
-
-      fences.native.visible = false;
-      fences.native.material[0].transparent = true;
-      fencesPhysics.native.visible = false;
-      fences.native.material[0].map.wrapT = THREE.ClampToEdgeWrapping;
-      fences.native.material[0].map.repeat.set(1,1);
-      //fences.native.visible = false;//destroy()
-
-    // setup debug items //
+      // setup debug items //
       this.centerLine = centerLine;
       centerLine.native.visible = isDev ? this.debugParams.centerLine : false;
       this.skybox.skybox.visible = isDev ? this.debugParams.skybox : true;
 
-    // setup gates //
-    console.log({ centerLine })
-      // const gates = Gates(app, centerLine.native.geometry.vertices, terrain);
+      // setup gates //
+      const gates = Gates(app, centerLine.native.geometry.vertices, track.native);
       // this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
-    // do some collision handling //
+      // do some collision handling //
       slider.on('collision',  (otherObject, v, r, contactNormal) => {
         if (typeof otherObject.name === 'string') this.collisionStatus = 'hit ' + otherObject.name;
         let collided;
@@ -211,7 +184,7 @@ class App {
         }
       });
 
-    // setup controls //
+      // setup controls //
       if (firstPerson) {
         this.controls = new Controls({
           scene, 
@@ -225,9 +198,9 @@ class App {
         });
       }
 
-    // setup gameLoop //
+      // setup gameLoop //
 
-      this.gameLoop = new WHS.Loop((clock) => {
+        this.gameLoop = new WHS.Loop((clock) => {
 
         this.delta = clock.getElapsedTime();
     
@@ -355,7 +328,7 @@ class App {
 
   createGUI = () => {
     // gui
-    console.log({ t:  this })
+    console.log('creatGUI!!!')
     const gui = new dat.GUI();
     gui.add( this.debugParams, 'skybox').name('Skybox').onChange(( value ) => {
       this.debugParams.skybox = value;

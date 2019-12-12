@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../../modules/physics-module';
 import centerLine from '../centerLine';
+import { planeUnwrapUVs } from '../../utils/materialUtils';
 
 export default class Track extends WHS.MeshComponent {
   constructor(params = {}) {
@@ -21,23 +22,30 @@ export default class Track extends WHS.MeshComponent {
       geometry,
       material
     );
-    assignUVs(geometry);
-
-
-    // material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
-    //   map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
-    // });
-    material.normalScale.set(1,1)
+    planeUnwrapUVs(geometry);
+    //material.normalMap = new THREE.TextureLoader().load('./assets/NormalMap.png', map => {
+    material.normalMap = new THREE.TextureLoader().load('./assets/seamless-noise-normal.jpg', map => {
+      map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
+      map.repeat.set(10,10)
+      //map.offset.set(0.1, 0.1)
+    });
+    //material.map = new THREE.TextureLoader().load('./assets/UV_Grid_Sm.png', map => {
+    // material.map = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
+    //     map.wrapT = map.wrapS = THREE.RepeatWrapping;//RepeatWrapping
+    //     map.repeat.set(10,10)
+    //     map.offset.set(0.1, 0.1)
+    //   });
+    material.normalScale.set(0.2, 0.2)
     material.side = THREE.FrontSide;
     material.specularMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-specular.png', map => {
       map.wrapT = map.wrapS = THREE.RepeatWrapping;
     });
-    material.displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
-      map.wrapT = map.wrapS = THREE.RepeatWrapping;
-      map.repeat.set(1,1);
-    });
-    material.displacementScale = 8
-    const normalsHelper = new THREE.VertexNormalsHelper( mesh, 2, 0x00ff00, 1 );
+    material.needsUpdate = true;
+    // material.displacementMap = new THREE.TextureLoader().load('./assets/seamless-ice-snow-displacement.png', map => {
+    //   map.wrapT = map.wrapS = THREE.RepeatWrapping;
+    //   //map.repeat.set(1,1);
+    // });
+    // material.displacementScale = 5;
 
     return mesh;
   }
@@ -64,6 +72,7 @@ const createGeometries = () => {
   geometry.computeVertexNormals();
   geometry.computeFaceNormals();
   geometry.computeBoundingBox();
+  geometry.name = 'track';
 
   const perimeterGeometries = calculatePerimeters(vertices, o);
 
@@ -130,10 +139,14 @@ const calculatePerimeters = (vertices, o) => {
   // }
 
   // get last point of each segment, clockwise
-  for (let i = 0; i < vertices.length; i+=o) {
+  for (let i = 0; i < vertices.length; i += o) {
     perimeterL.push(vertices[i].pos);
-    perimeterR.push(vertices[i + o -1].pos)
   }
+  for (let i = vertices.length - 1; i >= 0; i -= o) {
+    perimeterR.push(vertices[i].pos);
+  }
+  
+  
 
   // for (let i = 2*o; i < vertices.length; i+=o) {
   //   perimeter.push(vertices[i].pos)

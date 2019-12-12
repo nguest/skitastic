@@ -1,17 +1,15 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../../modules/physics-module';
-import centerLine from '../centerLine';
+import { simplePlaneUnwrapUVs } from '../../utils/materialUtils';
+
 
 export default class Perimeters extends WHS.MeshComponent {
   constructor(params = {}) {
     super(params);
-    console.log({Perimeters: params})
   }
 
   build() {
-    //  const geo = this.createBufferGeometry();
-    console.log({ ppp: this.params })
     const perimeterGeometries = createGeometries(this.params.baseGeometries);
 
     const { geometry, material } = this.applyBridge({
@@ -23,7 +21,7 @@ export default class Perimeters extends WHS.MeshComponent {
       material
     );
     //assignUVs(geometry);
-    planeUnwrapUVs(geometry)
+    simplePlaneUnwrapUVs(geometry)
 
     material.map = new THREE.TextureLoader().load('../assets/fence.png', map => {
       //map.wrapT = map.wrapS = THREE.ClampToEdgeWrapping;
@@ -33,44 +31,37 @@ export default class Perimeters extends WHS.MeshComponent {
     });
 
     material.transparent = true;
-    material.doubleSide = true;
+    material.side = THREE.DoubleSide;
     material.emissive = new THREE.Color('#444444')
-    console.log({ material })
+    //material.wireframe = true;
 
-    console.log({ mesh })
     return mesh;
   }
 }
 
 const createGeometries = (baseGeometries) => {
   const vertices = calculateVertices(baseGeometries);
-  console.log({ vertices })
   const faces = calculateFaces(vertices);
 
   // create the geometry
   const geometry = new THREE.Geometry();
   geometry.vertices = vertices.map(v => new THREE.Vector3(v.pos[0], v.pos[1], v.pos[2]));
   geometry.faces = faces;
-  console.log({ perimegeo: geometry })
   geometry.computeVertexNormals();
   geometry.computeFaceNormals();
   geometry.computeBoundingBox();
+  geometry.name = 'perimeters'
 
   return geometry;
 }
 
 
-const calculateVertices = ({perimeterL, perimeterR}) => {
-  console.log({ perimeterR })
+const calculateVertices = ({ perimeterL, perimeterR }) => {
   const vertices = [];
-  const ph = 30 // perimeter height
+  const ph = 30; // perimeter height
   const p = [...perimeterR, ...perimeterL];
-    // calculate vertices for each centerpoint
+    // calculate vertices
     for (let i = 0; i < p.length; i++) {
-      if (p[i][1] > 100) {
-
-        console.error(p[i], i)
-      }
       vertices.push(
         { pos: [p[i][0],  p[i][1], p[i][2]] },
         { pos: [p[i][0],  p[i][1] + ph, p[i][2]] },
@@ -83,33 +74,11 @@ const calculateVertices = ({perimeterL, perimeterR}) => {
 const calculateFaces = (vertices) => {
   const faces = [];
   console.log({ vertices })
-  for (let i = 0; i < vertices.length - 3; i++) {
+  for (let i = 0; i < vertices.length - 3; i+=2) {
     faces.push(
       new THREE.Face3(i, i+2, i+1),
       new THREE.Face3(i+2, i+3, i+1),
     );
   }
   return faces;
-}
-
-function planeUnwrapUVs(geometry) {
-  for(var i = 0; i < geometry.faces.length / 2; i++) {
-    // two triangles per face
-    geometry.faceVertexUvs[ 0 ].push([
-      new THREE.Vector2( 0, 0 ),
-      new THREE.Vector2( 0, 1 ),
-      new THREE.Vector2( 1, 0 ),    
-    ]);
-
-    geometry.faces[ 2 * i ].materialIndex = i;
-
-    geometry.faceVertexUvs[ 0 ].push([
-      new THREE.Vector2( 0, 1 ),
-      new THREE.Vector2( 1, 1 ),
-      new THREE.Vector2( 1, 0 ),    
-    ]);
-
-    geometry.faces[ 2 * i + 1 ].materialIndex = i;
-  }    
-  geometry.elementsNeedUpdate = geometry.verticesNeedUpdate = true;
 }
