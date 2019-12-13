@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../../modules/physics-module';
 import centerLine from '../centerLine';
-import { planeUnwrapUVs } from '../../utils/materialUtils';
+// import { planeUnwrapUVs } from '../../utils/materialUtils';
 
 export default class Track extends WHS.MeshComponent {
   constructor(params = {}) {
@@ -108,35 +108,9 @@ const calculateFaces = (cp, o) => {
   return faceIndices;
 }
 
-const assignUVs = (geometry) => {
-
-  geometry.faceVertexUvs[0] = [];
-  geometry.faces.forEach(function(face) {
-    const components = ['x', 'y', 'z'].sort(function(a, b) {
-      return Math.abs(face.normal[a]) > Math.abs(face.normal[b]);
-    });
-
-    const v1 = geometry.vertices[face.a];
-    const v2 = geometry.vertices[face.b];
-    const v3 = geometry.vertices[face.c];
-
-    geometry.faceVertexUvs[0].push([
-      new THREE.Vector2(v1[components[0]], v1[components[1]]),
-      new THREE.Vector2(v2[components[0]], v2[components[1]]),
-      new THREE.Vector2(v3[components[0]], v3[components[1]])
-    ]);
-  });
-  geometry.uvsNeedUpdate = true;
-}
-
 const calculatePerimeters = (vertices, o) => {
   const perimeterL = [];
   const perimeterR = [];
-
-  // get all first segment, clockwise
-  // for (let i = 0; i < o; i++) {
-  //   perimeter.push(vertices[i].pos);
-  // }
 
   // get last point of each segment, clockwise
   for (let i = 0; i < vertices.length; i += o) {
@@ -145,18 +119,42 @@ const calculatePerimeters = (vertices, o) => {
   for (let i = vertices.length - 1; i >= 0; i -= o) {
     perimeterR.push(vertices[i].pos);
   }
-  
-  
-
-  // for (let i = 2*o; i < vertices.length; i+=o) {
-  //   perimeter.push(vertices[i].pos)
-  // }
-
-
-  // get all last segment
-
   return { perimeterL, perimeterR };
 }
+
+const planeUnwrapUVs = (geometry) => {
+  for (var i = 0; i < geometry.faces.length; i+=2) {
+    // calculate the x and z sizes of the first triangle of 2
+    const i1 = geometry.faces[i].a;
+    const i2 = geometry.faces[i].b;
+    const i3 = geometry.faces[i].c;
+
+    const v1 = geometry.vertices[i1];
+    const v2 = geometry.vertices[i2]
+    const v3 = geometry.vertices[i3]
+
+    const k = 100; // scale factor
+    const u = (v2.x - v1.x) / k;
+    const v = (v3.z - v1.z) / k;
+
+    // two triangles per face
+    geometry.faceVertexUvs[0].push([
+      new THREE.Vector2( 0, 0 ),
+      new THREE.Vector2( 0, u ),
+      new THREE.Vector2( v, 0 ),    
+    ]);
+    //geometry.faces[ 2 * i ].materialIndex = i;
+
+    geometry.faceVertexUvs[0].push([
+      new THREE.Vector2( 0, u ),
+      new THREE.Vector2( v, u ),
+      new THREE.Vector2( v, 0 ),
+    ]);
+    //geometry.faces[ 2 * i + 1 ].materialIndex = i;
+  }
+  geometry.elementsNeedUpdate = geometry.verticesNeedUpdate = true;
+}
+
 
 
    /*

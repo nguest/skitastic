@@ -6,12 +6,13 @@ export default class PerimeterGenerator {
 
   constructor(app, perimeterGeometries) {
     this.createPerimeter(app, perimeterGeometries);
-    return this.perimeters;
+    return this.physicsPerimeters;
   }
 
   createPerimeter = (app, perimeterGeometries) => {
-    this.perimeters = new Perimeters({
+    this.physicsPerimeters = new Perimeters({
       build: true,
+      height: 160,
       modules: [
         new ConcaveModule({
           friction: 0.3,
@@ -24,11 +25,31 @@ export default class PerimeterGenerator {
       },
       buffer: true,
       baseGeometries: perimeterGeometries,
+      visible: false,
     });
 
-    const normalsHelper = new FaceNormalsHelper( this.perimeters.native, 20, 0x00ff00, 1 );
+    //this.visiblePerimeters.addTo(app);
+
+    this.visiblePerimeters = new Perimeters({
+      build: true,
+      height: 20,
+      shadow: {
+        receive: true
+      },
+      buffer: true,
+      baseGeometries: perimeterGeometries,
+      visible: true,
+    });
+    
+    //.addTo(app)
+
+    console.log({ p: this.physicsPerimeters })
+
+    const normalsHelper = new FaceNormalsHelper( this.physicsPerimeters.native, 20, 0x00ff00, 1 );
     app.modules[1].scene.add(normalsHelper)
-    this.perimeters.addTo(app)
-    return this.perimeters;
+    this.physicsPerimeters.addTo(app);
+    this.visiblePerimeters.addTo(app)
+
+    return this.physicsPerimeters;
   }
 };

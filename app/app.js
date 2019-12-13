@@ -7,8 +7,7 @@ import * as dat from 'dat.gui';
 
 
 import SkyBox from './components/Skybox';
-import Terrain from './components/Terrain';
-import Trees, { Tree } from './components/Trees';
+import Trees from './components/Trees';
 import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
@@ -21,8 +20,8 @@ import DecalGeometry from './modules/DecalGeometry';
 import Label from './components/Label';
 import TerrainGenerator from './components/TerrainGenerator';
 import PerimeterGenerator from './components/PerimeterGenerator';
+import centerLine from './components/centerLine';
 
-import { CanvasRenderer } from 'three';
 
 class App {
   constructor() {
@@ -89,7 +88,6 @@ class App {
         color: 0xc3aaa7,
         density: isDev ? this.debugParams.fog : 0.004,
       }));
-    if (isDev) this.app.module(new StatsModule());
 
   // renderer shadow hack //
     this.app.modules[3].renderer.shadowMap.enabled = true;
@@ -105,7 +103,6 @@ class App {
     this.camera = this.app.manager.get('camera')
     this.skybox = new SkyBox(this.app, this.scene);
     this.slider = new Slider(this.app);
-    [this.terrainOuter, this.centerLine] = new Terrain(this.app);
     this.finish = new Finish(this.app); 
     this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
@@ -115,6 +112,7 @@ class App {
     if (isDev) {
       document.body.classList = 'isDev';
       this.createGUI();
+      this.app.module(new StatsModule());
     }
   // finally, initialize the world //:
     this.initWorld(this.gameInProgress, this.firstPerson);
@@ -129,9 +127,7 @@ class App {
     const { 
       app, 
       camera, 
-      finish, 
-      terrainOuter, 
-      centerLine, 
+      finish,
       slider, 
       scene, 
       skybox, 
@@ -140,20 +136,14 @@ class App {
       rocks
     } = this;
 
-    Promise.all([finish, terrainOuter, centerLine, slider, rocks])
-    .then(([finish, terrainOuter, centerLine, slider, rocks]) => {
+    Promise.all([finish, slider, rocks])
+    .then(([finish, slider, rocks]) => {
       
 
 
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
       const [track, outerTerrain] = this.terrainGenerator;
       const perimeterGenerator = new PerimeterGenerator(this.app, track.perimeterGeometries)
-
-
-      terrainOuter.native.visible = false;
-
-      // name objects //
-      [track, terrainOuter].map(object => object.native.name = [object])
 
       // update slider params //
       if (!isDev) slider.native.visible = false;
@@ -166,12 +156,11 @@ class App {
       label.addTo(this.app)
 
       // setup debug items //
-      this.centerLine = centerLine;
-      centerLine.native.visible = isDev ? this.debugParams.centerLine : false;
+      //this.centerLine = centerLine;
       this.skybox.skybox.visible = isDev ? this.debugParams.skybox : true;
 
       // setup gates //
-      const gates = Gates(app, centerLine.native.geometry.vertices, track.native);
+      const gates = Gates(app, centerLine, track.native);
       // this.collidableMeshList = gates.map(gate => gate.getPortalObject())
     
       // do some collision handling //

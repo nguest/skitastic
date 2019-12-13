@@ -18,9 +18,9 @@
 	import * as THREE from 'three';
 //( function () {
 
-	function DecalGeometry( mesh, position, orientation, size ) {
+	function DecalGeometry(mesh, position, orientation, size) {
 
-  	THREE.BufferGeometry.call( this );
+  	THREE.BufferGeometry.call(this);
 
   	this.type = 'DecalGeometry';
 

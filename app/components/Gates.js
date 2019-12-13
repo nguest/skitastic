@@ -49,12 +49,15 @@ const getCenterlinePoint = (goal, vertices) => {
   ));
 }
 
-const Gates = (app, vertices, track) => {
+const Gates = (app, centerLine, track) => {
   // make array of actual gate positions on terrain surface
-  //const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices)) 
+  //const gatePositions = gateConfig.map(gate => makeGatePosition(gate, vertices))
+
+  console.log({ centerLine })
+  const centerLineVertices = centerLine.map(p => new THREE.Vector3(p.x, p.y, p.z))
   const gatePositions = gateConfig.map(gate => {
 
-    const centerPoint = getCenterlinePoint(gate, vertices)
+    const centerPoint = getCenterlinePoint(gate, centerLineVertices)
     const outerPoints = getGateOuterPoints(centerPoint, track)
     return { centerPoint, outerPoints };
 

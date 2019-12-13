@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import * as WHS from 'whs';
 import * as PHYSICS from '../../modules/physics-module';
-import { simplePlaneUnwrapUVs } from '../../utils/materialUtils';
-
 
 export default class Perimeters extends WHS.MeshComponent {
   constructor(params = {}) {
@@ -10,61 +8,72 @@ export default class Perimeters extends WHS.MeshComponent {
   }
 
   build() {
-    const perimeterGeometries = createGeometries(this.params.baseGeometries);
+    const { baseGeometries, height, visible } = this.params
+    const createdGeometry = createGeometries(baseGeometries, height);
 
     const { geometry, material } = this.applyBridge({
-      geometry: perimeterGeometries,
-      material: new THREE.MeshPhongMaterial() // red
+      geometry: createdGeometry,
+      material: new THREE.MeshPhongMaterial(),
     });
+
+
+    material.visible = false;
+    if (visible) {
+      simplePlaneUnwrapUVs(geometry);
+      material.visible = true;
+      material.map = new THREE.TextureLoader().load('../assets/fence.png', map => {
+        map.wrapT = map.wrapS = THREE.ClampToEdgeWrapping;
+        map.wrapT = map.wrapS = THREE.RepeatWrapping;
+        map.repeat.set(1,5);
+        //map.transparent = true;
+      });
+  
+      material.transparent = true;
+      material.side = THREE.DoubleSide;
+      material.emissive = new THREE.Color('#444444')
+    }
+
     const mesh = new THREE.Mesh(
       geometry,
       material
     );
-    //assignUVs(geometry);
-    simplePlaneUnwrapUVs(geometry)
-
-    material.map = new THREE.TextureLoader().load('../assets/fence.png', map => {
-      //map.wrapT = map.wrapS = THREE.ClampToEdgeWrapping;
-      map.wrapT = map.wrapS = THREE.RepeatWrapping;
-      map.repeat.set(1,2);
-      //map.transparent = true;
-    });
-
-    material.transparent = true;
-    material.side = THREE.DoubleSide;
-    material.emissive = new THREE.Color('#444444')
+    
     //material.wireframe = true;
-
     return mesh;
   }
 }
 
-const createGeometries = (baseGeometries) => {
-  const vertices = calculateVertices(baseGeometries);
+const createGeometries = (baseGeometries, height, visible) => {
+  const vertices = calculateVertices(baseGeometries, height);
   const faces = calculateFaces(vertices);
 
-  // create the geometry
+  // create the geometries
   const geometry = new THREE.Geometry();
   geometry.vertices = vertices.map(v => new THREE.Vector3(v.pos[0], v.pos[1], v.pos[2]));
   geometry.faces = faces;
-  geometry.computeVertexNormals();
-  geometry.computeFaceNormals();
-  geometry.computeBoundingBox();
-  geometry.name = 'perimeters'
+  geometry.name = 'physicsPerimeters';
+
+  if (visible) {
+    geometry.computeVertexNormals();
+    geometry.computeFaceNormals();
+    geometry.computeBoundingBox();
+    geometry.name = 'visiblePerimeters';
+  }
+
 
   return geometry;
 }
 
 
-const calculateVertices = ({ perimeterL, perimeterR }) => {
+const calculateVertices = ({ perimeterL, perimeterR }, height) => {
   const vertices = [];
-  const ph = 30; // perimeter height
+
   const p = [...perimeterR, ...perimeterL];
     // calculate vertices
     for (let i = 0; i < p.length; i++) {
       vertices.push(
         { pos: [p[i][0],  p[i][1], p[i][2]] },
-        { pos: [p[i][0],  p[i][1] + ph, p[i][2]] },
+        { pos: [p[i][0],  p[i][1] + height, p[i][2]] },
       );
     }
   
@@ -73,7 +82,6 @@ const calculateVertices = ({ perimeterL, perimeterR }) => {
 
 const calculateFaces = (vertices) => {
   const faces = [];
-  console.log({ vertices })
   for (let i = 0; i < vertices.length - 3; i+=2) {
     faces.push(
       new THREE.Face3(i, i+2, i+1),
@@ -81,4 +89,29 @@ const calculateFaces = (vertices) => {
     );
   }
   return faces;
+}
+
+const simplePlaneUnwrapUVs = (geometry) => {
+  const x = 1;
+  const y = 1;
+  for (var i = 0; i <= geometry.faces.length * 0.5; i++) {
+    // two triangles per face
+    geometry.faceVertexUvs[0].push([
+      new THREE.Vector2( 0, 0 ),
+      new THREE.Vector2( 0, x ),
+      new THREE.Vector2( y, 0 ),    
+    ]);
+
+    //geometry.faces[ 2 * i ].materialIndex = i;
+
+    geometry.faceVertexUvs[0].push([
+      new THREE.Vector2( 0, x ),
+      new THREE.Vector2( y, x ),
+      new THREE.Vector2( y, 0 ),
+    ]);
+
+    //geometry.faces[ 2 * i + 1 ].materialIndex = i;
+  }
+  geometry.elementsNeedUpdate = true;
+  geometry.verticesNeedUpdate = true;
 }
