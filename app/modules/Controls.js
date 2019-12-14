@@ -3,6 +3,7 @@ import * as WHS from 'whs';
 import TWEEN from '@tweenjs/tween.js';
 import APPCONFIG, { isDev } from '../AppConfig';
 import Skis from '../components/Skis';
+import { r } from '../utils/mathsTools';
 
 // e.g. physics.applyCentralImpulse(v)
 // applyImpulse
@@ -189,7 +190,7 @@ class Controls {
 		this.targetObject.position.set(lookAt.x,lookAt.y + 10,lookAt.z)
 
 	//  camera
-		this.camera.native.lookAt(0,2.5,0)
+		this.camera.native.lookAt(0,2.5,0);
 		this.camera.native.position.x = - this.skis.rotation.toVector3().y * 25;
 		this.camera.native.position.y = this.skis.rotation.toVector3().x + 10;
 
@@ -205,12 +206,19 @@ class Controls {
 			const a = particles.geometry.attributes.position;
 			//let y = particles.geometry.attributes.position.array[ i + 1 ];
 			//const z = particles.geometry.attributes.position.array[ i + 2 ];
-			const y = a.getY(i);
-			a.setY(i, y + 0.5)
-			//y += 1;
-			if (i === 0) {
-				console.log(y)
+			let y = a.getY(i) + r(0.4);
+			let x = a.getX(i) + r(0.15);
+			let z = a.getZ(i) + r(0.15);
+
+			if (y > 150 + r(10) || x > 20 + r(5) || y > 20 + r(5)) {
+				x = 0;
+				y = 0;
+				z = 0;
 			}
+
+			a.setXYZ(i, x, y + .3, z)
+			//y += 1;
+			particles.geometry.attributes.position.needsUpdate=true;
 			//console.log({ object })
       //if ( object instanceof THREE.Points ) {
         //object.position.y = clock * 0.01;
@@ -233,7 +241,7 @@ class Controls {
 			console.log('jump!')
 		}
 	// stop things getting sillyfast
-		if (this.physics.getLinearVelocity().clone().z < -350) {
+		if (this.physics.getLinearVelocity().clone().z < -550) {
 			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: this.params.retardation});
 		}        
 		//this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });

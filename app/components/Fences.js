@@ -6,7 +6,7 @@ import { MeshPhongMaterial } from 'three';
 class Fences {
   constructor(app) {
     const fencesPhysics = new WHS.Importer({
-      loader: new THREE.JSONLoader(),
+      loader: new THREE.ObjectLoader(),
       url: './assets/fencesPhysics.json',
       modules: [
         new PHYSICS.ConcaveModule({
@@ -25,7 +25,7 @@ class Fences {
     }).addTo(app);
   
     const fences = new WHS.Importer({
-      loader: new THREE.JSONLoader(),
+      loader: new THREE.ObjectLoader(),
       url: './assets/fences.json',
       shadow: {
         cast: true,

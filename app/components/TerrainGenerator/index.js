@@ -21,7 +21,7 @@ class TerrainGenerator {
       build: true,
       modules: [
         new PHYSICS.ConcaveModule({
-          friction: 0.3,
+          friction: 0.1,
           mass: 0,
           restitution: 0.1,
         }),

@@ -7,7 +7,7 @@ class Terrain {
 
   constructor(app) {
     const track = new WHS.Importer({
-      loader: new THREE.JSONLoader(),
+      loader: new THREE.ObjectLoader(),
       url: './assets/track2.json',
 
       modules: [
@@ -30,7 +30,7 @@ class Terrain {
     })//.addTo(app)
 
     const terrainOuter = new WHS.Importer({
-      loader: new THREE.JSONLoader(),
+      loader: new THREE.ObjectLoader(),
       url: './assets/trackOuter.json',
       shadow: {
         receive: true
@@ -42,7 +42,7 @@ class Terrain {
 
 
     const centerLine = new WHS.Importer({
-      loader: new THREE.JSONLoader(),
+      loader: new THREE.ObjectLoader(),
       url: './assets/centerLine.json',
       position: {
         y: 0
