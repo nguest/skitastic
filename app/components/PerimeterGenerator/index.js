@@ -20,9 +20,6 @@ export default class PerimeterGenerator {
           restitution: 0.1,
         }),
       ],
-      shadow: {
-        receive: true
-      },
       buffer: true,
       baseGeometries: perimeterGeometries,
       visible: false,
@@ -34,7 +31,8 @@ export default class PerimeterGenerator {
       build: true,
       height: 20,
       shadow: {
-        receive: true
+        receive: true,
+        cast: true,
       },
       buffer: true,
       baseGeometries: perimeterGeometries,

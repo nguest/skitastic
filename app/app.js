@@ -78,6 +78,8 @@ class App {
           shadowMap: { enabled: true},
           bgColor: 0xaaddff,
           localClippingEnabled: true,
+          //autoClear: false,
+          //sortObjects: false
         }),
       )
       .module(this.worldModule)
@@ -173,7 +175,7 @@ class App {
         }
       });
 
-      // setup controls //
+    // setup controls //
       if (firstPerson) {
         this.controls = new Controls({
           scene, 
@@ -186,10 +188,10 @@ class App {
           clippingPlane,
         });
       }
+      console.log({ 'this.controls':this.controls, 'this.slider': slider })
+    // setup gameLoop //
 
-      // setup gameLoop //
-
-        this.gameLoop = new WHS.Loop((clock) => {
+      this.gameLoop = new WHS.Loop((clock) => {
 
         this.delta = clock.getElapsedTime();
     
@@ -200,6 +202,12 @@ class App {
         //this.detectGateCollisions(slider);
         
       })
+
+      //this.spray = new WHS.Loop(() => {
+        console.log({ aa:this.controls.skis.children })
+        //this.controls.skis.children[2].loop.start(app);
+        //box.rotation.y += 0.02;
+      //}).start(app);
 
     // add eventlisteners //
 

@@ -36,7 +36,7 @@ const APPCONFIG = {
     }
   },
   clipDistance: 10000,
-  startPosition: new THREE.Vector3(0,0,0),
+  startPosition: new THREE.Vector3(0,-10,0),
   lightPosition: new THREE.Vector3(50,50,40),
   skyboxPosition: new THREE.Vector3(0, -120, -150),
 }

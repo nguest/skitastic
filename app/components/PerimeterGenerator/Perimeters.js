@@ -24,13 +24,13 @@ export default class Perimeters extends WHS.MeshComponent {
       material.map = new THREE.TextureLoader().load('../assets/fence.png', map => {
         map.wrapT = map.wrapS = THREE.ClampToEdgeWrapping;
         map.wrapT = map.wrapS = THREE.RepeatWrapping;
-        map.repeat.set(1,5);
+        map.repeat.set(5,1);
         //map.transparent = true;
       });
   
       material.transparent = true;
       material.side = THREE.DoubleSide;
-      material.emissive = new THREE.Color('#444444')
+      material.emissive = new THREE.Color('#444444');
     }
 
     const mesh = new THREE.Mesh(
@@ -64,6 +64,10 @@ const createGeometries = (baseGeometries, height, visible) => {
   return geometry;
 }
 
+const r = (x) => {
+  return (Math.random() - 0.5) * x;
+}
+
 
 const calculateVertices = ({ perimeterL, perimeterR }, height) => {
   const vertices = [];
@@ -73,7 +77,7 @@ const calculateVertices = ({ perimeterL, perimeterR }, height) => {
     for (let i = 0; i < p.length; i++) {
       vertices.push(
         { pos: [p[i][0],  p[i][1], p[i][2]] },
-        { pos: [p[i][0],  p[i][1] + height, p[i][2]] },
+        { pos: [p[i][0] + r(10),  p[i][1] + height, p[i][2]] },
       );
     }
   
@@ -96,18 +100,27 @@ const simplePlaneUnwrapUVs = (geometry) => {
   const y = 1;
   for (var i = 0; i <= geometry.faces.length * 0.5; i++) {
     // two triangles per face
+    // geometry.faceVertexUvs[0].push([
+    //   new THREE.Vector2( 0, 0 ),
+    //   new THREE.Vector2( 0, x ),
+    //   new THREE.Vector2( y, 0 ),    
+    // ]);
     geometry.faceVertexUvs[0].push([
-      new THREE.Vector2( 0, 0 ),
       new THREE.Vector2( 0, x ),
-      new THREE.Vector2( y, 0 ),    
+      new THREE.Vector2( -y, x ),
+      new THREE.Vector2( 0, 0 ),    
     ]);
-
     //geometry.faces[ 2 * i ].materialIndex = i;
 
+    // geometry.faceVertexUvs[0].push([
+    //   new THREE.Vector2( 0, x ),
+    //   new THREE.Vector2( y, x ),
+    //   new THREE.Vector2( y, 0 ),
+    // ]);
     geometry.faceVertexUvs[0].push([
-      new THREE.Vector2( 0, x ),
-      new THREE.Vector2( y, x ),
-      new THREE.Vector2( y, 0 ),
+      new THREE.Vector2( -y, x ),
+      new THREE.Vector2( -x, 0 ),
+      new THREE.Vector2( 0, 0 ),
     ]);
 
     //geometry.faces[ 2 * i + 1 ].materialIndex = i;

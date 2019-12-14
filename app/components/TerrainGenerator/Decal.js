@@ -18,15 +18,22 @@ export default class Decal extends WHS.MeshComponent {
     const { geometry, material } = this.applyBridge({
       geometry: decalGeometry,
       material: new THREE.MeshPhongMaterial({
-        depthTest:  true, 
-        depthWrite: true, 
+        // depthTest:  false, 
+        // depthWrite: false, 
         polygonOffset: true,
-        polygonOffsetFactor: -1, 
+        polygonOffsetFactor: -1,
+        transparent: true,
+        renderOrder: 1,
+
+        opacity: 0.5,
+
+        //alphaTest: 0.5
+       // depthFunc: THREE.LessDepth,
       }),
     });
 
 
-    material.map = new THREE.TextureLoader().load('./assets/UV_Grid_Sm.png', map => {
+    material.map = new THREE.TextureLoader().load('./assets/blueLine.png', map => {
       map.wrapT = map.wrapS = THREE.RepeatWrapping;
     });
   
@@ -46,7 +53,7 @@ const createGeometry = (track) => {
     decalPosition,
     //new THREE.Vector3(0,0,0),
     new THREE.Euler(Math.PI/2,0,0, 'XYZ'),
-    new THREE.Vector3(100,100,100)
+    new THREE.Vector3(50,50,50)
   );
   //geometry.scale(.1,.1,.1)
   return geometry;

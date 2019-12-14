@@ -199,6 +199,23 @@ class Controls {
 		this.skis.children[0].position.y = Math.min(0, - this.yawObject.rotation.z *4 ) - 4.9
 		this.skis.children[1].position.y = Math.min(0, this.yawObject.rotation.z * 4) - 4.9
 
+		const particles = this.skis.children[2]
+		//console.log({ 2: particles })
+    for (var i = 0; i < particles.geometry.attributes.position.count; i ++ ) {
+			const a = particles.geometry.attributes.position;
+			//let y = particles.geometry.attributes.position.array[ i + 1 ];
+			//const z = particles.geometry.attributes.position.array[ i + 2 ];
+			const y = a.getY(i);
+			a.setY(i, y + 0.5)
+			//y += 1;
+			if (i === 0) {
+				console.log(y)
+			}
+			//console.log({ object })
+      //if ( object instanceof THREE.Points ) {
+        //object.position.y = clock * 0.01;
+      //}
+    }
 
 		//console.log(this.yawObject.rotation.z,Math.min(0, - this.yawObject.rotation.z *4 ),Math.min(0, this.yawObject.rotation.z * 4))
 	// move the light and lightshadow with object
