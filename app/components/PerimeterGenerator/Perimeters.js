@@ -16,7 +16,6 @@ export default class Perimeters extends WHS.MeshComponent {
       material: new THREE.MeshPhongMaterial(),
     });
 
-
     material.visible = false;
     if (visible) {
       simplePlaneUnwrapUVs(geometry);
@@ -28,6 +27,7 @@ export default class Perimeters extends WHS.MeshComponent {
         //map.transparent = true;
       });
   
+      material.blendingMode = THREE.AdditiveBlending
       material.transparent = true;
       material.side = THREE.DoubleSide;
       material.emissive = new THREE.Color('#444444');

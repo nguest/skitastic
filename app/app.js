@@ -12,7 +12,6 @@ import Lights from './components/Lights';
 import Slider from './components/Slider';
 import Gates from './components/Gates';
 import Finish from './components/Finish';
-import Rocks from './components/Rocks';
 import Misc from './components/Misc';
 import Controls from './modules/Controls';
 import GameState from './GameState';
@@ -106,7 +105,6 @@ class App {
     this.skybox = new SkyBox(this.app, this.scene);
     this.slider = new Slider(this.app);
     this.finish = new Finish(this.app); 
-    this.rocks = new Rocks(this.app);
     this.lights = new Lights(this.app, this.scene);
     this.terrainGenerator = new TerrainGenerator(this.app);
 
@@ -135,17 +133,16 @@ class App {
       skybox, 
       lights, 
       clippingPlane,
-      rocks
     } = this;
 
-    Promise.all([finish, slider, rocks])
-    .then(([finish, slider, rocks]) => {
+    Promise.all([finish, slider])
+    .then(([finish, slider]) => {
       
 
 
       //track.native.geometry = new THREE.BufferGeometry().fromGeometry(track.native.geometry)
       const [track, outerTerrain] = this.terrainGenerator;
-      const perimeterGenerator = new PerimeterGenerator(this.app, track.perimeterGeometries)
+      const perimeterGenerator = new PerimeterGenerator(app, track.perimeterGeometries)
 
       // update slider params //
       if (!isDev) slider.native.visible = false;
@@ -188,29 +185,18 @@ class App {
           clippingPlane,
         });
       }
-      console.log({ 'this.controls':this.controls, 'this.slider': slider })
+
     // setup gameLoop //
-
       this.gameLoop = new WHS.Loop((clock) => {
-
         this.delta = clock.getElapsedTime();
-    
         if (firstPerson) this.controls.update(this.delta);
-    
+  
         this.displayStatus(this.delta);
-    
         //this.detectGateCollisions(slider);
         
-      })
-
-      //this.spray = new WHS.Loop(() => {
-        console.log({ aa:this.controls.skis.children })
-        //this.controls.skis.children[2].loop.start(app);
-        //box.rotation.y += 0.02;
-      //}).start(app);
+      });
 
     // add eventlisteners //
-
       this.addEventListeners(gameInProgress, firstPerson)
       app.start();
       this.worldModule.simulateLoop.stop();
@@ -222,7 +208,6 @@ class App {
   // other class methods             
   //////////////////////////////////////
   
-
   displayStatus = (delta) => {
     this.updateDisplay('speed', parseInt(this.controls.displaySpeed() * 0.25));
     this.updateDisplay('status', this.collisionStatus || '')
@@ -275,9 +260,9 @@ class App {
         console.log(" Hit ", collidee);
         this.collisionStatus = "Hit " + collidee
         this.gameState.setState({ [collidee]: this.delta })
-
       }
-    })
+    });
+
     gateConfig.map((gate,idx) => {
       // look if a gate is recorded in gameState
       const gateState = this.gameState.getState()[`gate-${idx}`]

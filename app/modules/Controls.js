@@ -200,7 +200,7 @@ class Controls {
 			console.log('jump!')
 		}
 	// stop things getting sillyfast
-		if (this.physics.getLinearVelocity().clone().z < -500) {
+		if (this.physics.getLinearVelocity().clone().z < -350) {
 			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: this.params.retardation});
 		}        
 		//this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });

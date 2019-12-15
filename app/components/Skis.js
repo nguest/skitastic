@@ -70,7 +70,6 @@ const Spray = () => {
   geometry.attributes.position = new THREE.BufferAttribute( vertices, 3 ).setDynamic(true);
   //geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 1 )).setDynamic(true);//.setUsage( THREE.DynamicDrawUsage ) );
 
-  //geometry.attributes.position
   const size = 0.05;
   const material = new THREE.PointsMaterial({ 
     size: size,
@@ -85,5 +84,5 @@ const Spray = () => {
   
   const particles = new THREE.Points( geometry, material );
 
-  return particles
+  return particles;
 }

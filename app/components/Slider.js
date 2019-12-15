@@ -23,12 +23,7 @@ class Slider {
         material: new THREE.MeshPhongMaterial({
             color: 0x00ff00,
             wireframe: true
-        }),
-
-        // shadow: {
-        //     cast: true,
-        //     receive: true,
-        // },        
+        }),  
 
         position: APPCONFIG.startPosition
     }).addTo(app);
