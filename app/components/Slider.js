@@ -14,7 +14,7 @@ class Slider {
 
         modules: [
             new PHYSICS.SphereModule({
-            mass: 20,
+            mass: 50,
             restitution: 0.9,
             friction: 0.5,
             })

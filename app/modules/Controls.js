@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import * as WHS from 'whs';
 import TWEEN from '@tweenjs/tween.js';
 import APPCONFIG, { isDev } from '../AppConfig';
 import Skis from '../components/Skis';
@@ -44,7 +43,6 @@ class Controls {
 		this.scene = scene;
 		//this.mesh.use('physics').setAngularFactor({ x: 0, y: 0, z: 0 });
 	// distance from physics sphere
-		this.camera.position.set(0, 10, 22 );
 
 		
 		/* Init */
@@ -56,22 +54,22 @@ class Controls {
 		this.targetObject = new THREE.Mesh(
 			new THREE.SphereBufferGeometry(0.2,1,8)
 		);
-		
-		this.yawObject = new THREE.Object3D();
-		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
-		this.yawObject.add(this.camera.native);
-		this.camera.native.lookAt(0,-20,-60)
+		if (isDev) this.scene.add(this.targetObject)
 
-		this.scene.add(this.yawObject);
-		console.log(this.camera.native)
-
+		// initialize camera
+		this.camera.position.set(0, 10, 22 );
+		this.camera.native.lookAt(0,-20,-60);
 		if (isDev) {
 			const helper = new THREE.CameraHelper( this.camera.native );
 			this.scene.add( helper );
 		}
 
-		//this.camera.native.lookAt(0,-10,0)
-		//this.camera.native.target = this.targetObject;
+		// initialize yawObject
+		this.yawObject = new THREE.Object3D();
+		this.yawObject.position.set(APPCONFIG.startPosition.x,APPCONFIG.startPosition.y,APPCONFIG.startPosition.z);
+		this.yawObject.add(this.camera.native);
+		this.scene.add(this.yawObject);
+
 
 		let vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
@@ -81,34 +79,27 @@ class Controls {
 
 		// this.arrowHelper = new THREE.ArrowHelper( vN, origin, length, hex );
 		// this.scene.add( this.arrowHelper );
-		
-		// this.yawObject.position.y = this.params.ypos; // eyes are 2 meters above the ground
-		if (isDev) this.scene.add(this.targetObject)
-		
+				
 		this.quat = new THREE.Quaternion();
 		
 		this.createSkis();
 
 		this.tRight = new TWEEN.Tween(this.yawObject.rotation)
-		.to({z: -0.5}, 1000 )
-		.onUpdate(() => {})
-	//	.easing( TWEEN.Easing.Linear.None)
-		.easing( TWEEN.Easing.Sinusoidal.In )
-
+			.to({z: -0.5}, 1000 )
+			.onUpdate(() => {})
+			.easing( TWEEN.Easing.Sinusoidal.In )
 
 		this.tLeft = new TWEEN.Tween(this.yawObject.rotation)
-		.to({z: 0.5}, 600 )
-		.onUpdate(() => {})
-		//.easing( TWEEN.Easing.Linear.None)
-		.easing( TWEEN.Easing.Sinusoidal.In )
-
+			.to({z: 0.5}, 1000 )
+			.onUpdate(() => {})
+			.easing( TWEEN.Easing.Sinusoidal.In )
 
 		this.tReturn = new TWEEN.Tween(this.yawObject.rotation)
-		.to({z: 0}, 600 )
-		.onUpdate(() => {})
-		.easing( TWEEN.Easing.Linear.None)
+			.to({z: 0}, 600 )
+			.onUpdate(() => {})
+			.easing( TWEEN.Easing.Linear.None)
 
-		this.scene.add(this.yawObject);
+		//this.scene.add(this.yawObject);
 		
 		// Moves.
 		this.moveForward = false;
@@ -116,14 +107,12 @@ class Controls {
 		this.moveLeft = false;
 		this.moveRight = false;
 		
-		this.addListeners(player)
+		this.addListeners(player);
   }
 
   createSkis() {
 		this.skis = Skis(this.track, this.scene);
 		this.yawObject.add(this.skis);
-
-	//this.skis.add(this.camera.native)
 	}
  
   enableTracking(isEnabled) {
@@ -179,8 +168,6 @@ class Controls {
 		euler.order = 'XYZ';
 		this.quat.setFromEuler(euler);
 
-	//	console.log(this.yawObject.position.z)
-
 		const vN = this.physics.getLinearVelocity().clone();
 		vN.normalize();
 
@@ -194,44 +181,16 @@ class Controls {
 		this.camera.native.position.x = - this.skis.rotation.toVector3().y * 25;
 		this.camera.native.position.y = this.skis.rotation.toVector3().x + 10;
 
-	// ski rotation
-		this.skis.lookAt(vN.clone())
-		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
-		this.skis.children[0].position.y = Math.min(0, - this.yawObject.rotation.z *4 ) - 4.9
-		this.skis.children[1].position.y = Math.min(0, this.yawObject.rotation.z * 4) - 4.9
-
-		const particles = this.skis.children[2]
-		//console.log({ 2: particles })
-    for (var i = 0; i < particles.geometry.attributes.position.count; i ++ ) {
-			const a = particles.geometry.attributes.position;
-			//let y = particles.geometry.attributes.position.array[ i + 1 ];
-			//const z = particles.geometry.attributes.position.array[ i + 2 ];
-			let y = a.getY(i) + r(0.4);
-			let x = a.getX(i) + r(0.15);
-			let z = a.getZ(i) + r(0.15);
-
-			if (y > 150 + r(10) || x > 20 + r(5) || y > 20 + r(5)) {
-				x = 0;
-				y = 0;
-				z = 0;
-			}
-
-			a.setXYZ(i, x, y + .3, z)
-			//y += 1;
-			particles.geometry.attributes.position.needsUpdate=true;
-			//console.log({ object })
-      //if ( object instanceof THREE.Points ) {
-        //object.position.y = clock * 0.01;
-      //}
-    }
-
-		//console.log(this.yawObject.rotation.z,Math.min(0, - this.yawObject.rotation.z *4 ),Math.min(0, this.yawObject.rotation.z * 4))
+	// update skis
+		this.updateSkis(vN);
+	// update spray
+		this.updateSpray();
 	// move the light and lightshadow with object
 		this.updateLightsAndSkybox();
 	// make sure TWEEN gets updates
 		TWEEN.update();
 	// update clipping
-		this.clippingPlane.constant = - this.yawObject.position.z + APPCONFIG.clipDistance;
+		this.updateClipping()
 
 		inputVelocity.applyQuaternion(this.quat);
 
@@ -241,7 +200,7 @@ class Controls {
 			console.log('jump!')
 		}
 	// stop things getting sillyfast
-		if (this.physics.getLinearVelocity().clone().z < -550) {
+		if (this.physics.getLinearVelocity().clone().z < -500) {
 			this.physics.applyCentralImpulse({ x: inputVelocity.x, y: 0, z: this.params.retardation});
 		}        
 		//this.physics.setAngularVelocity({ x: inputVelocity.z, y: 0, z: -inputVelocity.x });
@@ -261,9 +220,53 @@ class Controls {
 		this.skybox.position.x = posn.x + APPCONFIG.skyboxPosition.x;
 		this.skybox.position.y = posn.y + APPCONFIG.skyboxPosition.y;
 		this.skybox.position.z = posn.z + APPCONFIG.skyboxPosition.z;
+	}
+
+	updateSkis(vN) {
+		// ski rotation - children[0] is left ski
+		this.skis.lookAt(vN.clone())
+		this.skis.children[0].rotation.z = this.skis.children[1].rotation.z = -this.yawObject.rotation.z;
+		this.skis.children[0].position.y = Math.min(0, this.yawObject.rotation.z * 4 ) - 4.9
+		this.skis.children[1].position.y = Math.min(0, - this.yawObject.rotation.z * 4) - 4.9
 
 	}
 
+	updateSpray() {
+		const sprayL = this.skis.children[0].children[1];
+		const sprayR = this.skis.children[1].children[1];
+
+    for (var i = 0; i <  sprayR.geometry.attributes.position.count; i ++ ) {
+			const aL = sprayL.geometry.attributes.position;
+			let xL = aL.getX(i) + r(0.25);
+			let yL = aL.getY(i) + r(0.4);
+			let zL = aL.getZ(i) + r(0.15);
+
+			if (yL > 150 + r(10) || xL > 20 + r(5) || yL > 20 + r(5)) {
+				xL = 1;
+				yL = 0;
+				zL = 0;
+			}
+			aL.setXYZ(i, xL, yL + .3, zL)
+			sprayL.geometry.attributes.position.needsUpdate = true;
+
+			const aR = sprayR.geometry.attributes.position;
+			let y = aR.getY(i) + r(0.4);
+			let x = aR.getX(i) + r(0.25);
+			let z = aR.getZ(i) + r(0.15);
+
+			if (y > 150 + r(10) || x > 20 + r(5) || y > 20 + r(5)) {
+				x = -1;
+				y = 0;
+				z = 0;
+			}
+			aR.setXYZ(i, x, y + .3, z)
+			sprayR.geometry.attributes.position.needsUpdate = true;
+    }
+	}
+
+	updateClipping() {
+		this.clippingPlane.constant = - this.yawObject.position.z + APPCONFIG.clipDistance;
+	}
 
 	displaySpeed = () => {
 		return this.physics.getLinearVelocity().clone().length();
@@ -372,4 +375,4 @@ class Controls {
 	};
 }
 
-export default Controls
+export default Controls;
