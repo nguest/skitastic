@@ -6,26 +6,26 @@ import APPCONFIG, { isDev } from '../AppConfig';
 class Slider {
   constructor(app) {
     const slider = new WHS.Sphere({ // Create sphere comonent.
-        geometry: {
-            radius: 5,
-            widthSegments: 8,
-            heightSegments: 8
-        },
+      geometry: {
+        radius: 5,
+        widthSegments: 8,
+        heightSegments: 8
+      },
 
-        modules: [
-            new PHYSICS.SphereModule({
-            mass: 50,
-            restitution: 0.9,
-            friction: 0.5,
-            })
-        ],
+      modules: [
+        new PHYSICS.SphereModule({
+          mass: 10,
+          restitution: 0.05,
+          friction: 0.2,
+        })
+      ],
 
-        material: new THREE.MeshPhongMaterial({
-            color: 0x00ff00,
-            wireframe: true
-        }),  
+      material: new THREE.MeshPhongMaterial({
+        color: 0x00ff00,
+        wireframe: true
+      }),  
 
-        position: APPCONFIG.startPosition
+      position: APPCONFIG.startPosition,
     }).addTo(app);
     
     return slider;

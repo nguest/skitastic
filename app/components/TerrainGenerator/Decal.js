@@ -13,7 +13,7 @@ export default class Decal extends WHS.MeshComponent {
   }
 
   build() {
-    const decalGeometry = createGeometry(this.params.track);
+    const decalGeometry = createGeometry(this.params.track, this.params.position);
 
     const { geometry, material } = this.applyBridge({
       geometry: decalGeometry,
@@ -46,11 +46,12 @@ export default class Decal extends WHS.MeshComponent {
   }
 }
 
-const createGeometry = (track) => {
+const createGeometry = (track, position) => {
   const decalPosition = new THREE.Vector3(0, -25, 0);
+  console.log({ position })
   const geometry = new DecalGeometry(
     track,
-    decalPosition,
+    position,
     //new THREE.Vector3(0,0,0),
     new THREE.Euler(Math.PI/2,0,0, 'XYZ'),
     new THREE.Vector3(50,50,50)

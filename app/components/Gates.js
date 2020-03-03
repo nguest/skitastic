@@ -3,7 +3,7 @@ import * as WHS from 'whs';
 import * as PHYSICS from '../modules/physics-module';
 import { gateConfig } from '../AppConfig';
 import Label from './Label';
-import { Vertex } from 'three';
+import Decal from './TerrainGenerator/Decal';
 
 // reduces to a 3d object with x,y,z
 const makeGatePosition = (goal, vertices) => {
@@ -70,7 +70,8 @@ const Gates = (app, centerLine, track) => {
       outerPoints: gate.outerPoints,
       w: gateConfig[idx].w, 
       idx, 
-      array
+      array,
+      track,
     }) 
   )
 
@@ -80,7 +81,7 @@ const Gates = (app, centerLine, track) => {
 
 class Gate {
 
-  constructor({ app, position, outerPoints, w, idx, array }) {
+  constructor({ app, position, outerPoints, w, idx, array, track }) {
     this.app = app;
     this.position = position;
     this.width = w;
@@ -98,6 +99,7 @@ class Gate {
     this.createPortal(app);
     this.createPoles(app);
     this.createLabel(app);
+    this.createDecal(app, track);
   }
 
   createPortal = (app) => {
@@ -211,6 +213,32 @@ class Gate {
       position: [this.position.x, this.position.y + 30, this.position.z]
     }).addTo(app);
   }
+
+  createDecal = (app, track) => {
+    const decal = new Decal({
+      position: new THREE.Vector3(this.position.x, this.position.y + 10, this.position.z),
+      build: true,
+      shadow: {
+        receive: true,
+      },
+      buffer: true,
+      track,
+    });
+    decal.addTo(app);
+    const helperBox = new WHS.Box({
+      geometry: {
+        width: 50,
+        height: 50,
+        depth: 50
+      },
+  
+  
+      position: new THREE.Vector3(this.position.x, this.position.y + 10, this.position.z),
+  
+      material: new THREE.MeshPhongMaterial({color: 0xff0000, wireframe: true})
+    }).addTo(app);
+  }
+
 }
 
 export default Gates;

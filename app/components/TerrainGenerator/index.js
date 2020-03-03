@@ -11,7 +11,7 @@ class TerrainGenerator {
   constructor(app) {
     this.createTrack(app);
     this.createOuterTerrain(app);
-    this.createDecal(app);
+    //this.createDecal(app);
 
     return [this.track, this.outerTerrain];
   }
@@ -51,17 +51,17 @@ class TerrainGenerator {
     app.modules[1].scene.add(normalsHelper);
   }
 
-  createDecal = (app) => {
-    this.decal = new Decal({
-      build: true,
-      shadow: {
-        receive: true
-      },
-      buffer: true,
-      track: this.track.native,
-    });
-    this.decal.addTo(app);
-  }
+  // createDecal = (app) => {
+  //   this.decal = new Decal({
+  //     build: true,
+  //     shadow: {
+  //       receive: true,
+  //     },
+  //     buffer: true,
+  //     track,
+  //   });
+  //   this.decal.addTo(app);
+  // }
 
   getTerrain() {
     return this.track;

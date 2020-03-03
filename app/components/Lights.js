@@ -55,11 +55,8 @@ class Lights {
       distance: 300,
       decay: 0.1,
       position: [10,10,-110],
-      //position: [0, 100, 0]
-
     }).addTo(app)
 
-    console.log({isDev})
     const helper = new THREE.DirectionalLightHelper(this.dlight.native)
     if (isDev) scene.add(helper)
     const helper2 = new THREE.CameraHelper(this.dlight.native.shadow.camera)
